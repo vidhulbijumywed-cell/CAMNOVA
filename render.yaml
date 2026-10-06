@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: camnova-rentals
+    runtime: node
+    plan: free
+    branch: main
+    buildCommand: npm ci --include=dev && npm run db:generate && npm run build
+    startCommand: bash scripts/deploy-start.sh
+    healthCheckPath: /login
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: SEED_ADMIN_EMAIL
+        value: owner@example.test
+      - key: SEED_ADMIN_PASSWORD
+        generateValue: true
+      - key: SEED_STAFF_EMAIL
+        value: staff@example.test
+      - key: SEED_STAFF_PASSWORD
+        generateValue: true
+      - key: SEED_DEMO
+        value: "false"

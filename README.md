@@ -2,6 +2,8 @@
 
 An authenticated rental operations workspace built from the supplied CAMNOVA tracker and brand guide. Next.js, TypeScript, Tailwind, PostgreSQL, Prisma, NextAuth, ExcelJS, pdf-lib, and Recharts.
 
+To host the internal app without buying a domain first, follow [Free-first deployment](DEPLOYMENT.md): Render Free for the Node.js app and Neon Free for persistent PostgreSQL. Start with the hosting-assigned HTTPS address; a custom domain can be connected later.
+
 The supplied logo was extracted directly from the PDF. Brand accents use CAMNOVA red (#ed1a3a), black, white, and the guide’s secondary palette. ITC Eras was not supplied as a licensed font asset, so headings use Inter as the documented fallback.
 
 ## Start locally
@@ -21,7 +23,7 @@ For a conventional machine, use its checkout directory instead of `/workspace/CA
 For an existing or managed PostgreSQL database, set `DATABASE_URL` securely, skip the Docker/setup shell script, then run:
 
 ```bash
-npm ci
+npm ci --include=dev
 npm run db:generate
 npm run db:migrate
 npm run db:seed
@@ -120,4 +122,4 @@ Do not overwrite a working database without preserving a separate backup. Backup
 
 To reset an existing account password, set `RESET_PASSWORD` through a secure shell/environment setting, then run `npm run user:password -- owner@example.test`. Never pass a password as a command-line argument or commit it. Editing SEED_ADMIN_PASSWORD after the first seed does not reset the existing account.
 
-Deploy to a Node.js host with durable PostgreSQL: install with `npm ci`, generate the client, apply migrations once per release, run `npm run build`, then `npm start`. Configure HTTPS origin and server secrets securely. External messaging, customer self-service, identity-document uploads, online payment processing, and multi-tenant access are outside this internal-app scope. No external deployment, Git push, or environment publication is performed automatically.
+Deploy to a Node.js host with durable PostgreSQL: install with `npm ci --include=dev`, generate the client, run `npm run build`, then apply migrations before starting the app. The first deployment also needs `npm run db:seed` with `SEED_DEMO=false`. Keep the development dependencies available for Prisma/tsx release commands. Follow [the deployment guide](DEPLOYMENT.md) for free plans, HTTPS origin, secrets, and connecting a new domain. External messaging, customer self-service, identity-document uploads, online payment processing, and multi-tenant access are outside this internal-app scope. No external deployment or resource purchase is performed automatically.
