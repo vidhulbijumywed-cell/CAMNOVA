@@ -1,0 +1,296 @@
+[
+  {
+    "name": "SONY A7M4",
+    "category": "CAMERA",
+    "quantity": 5,
+    "purchaseCost": 16000000,
+    "rate": 160000
+  },
+  {
+    "name": "SONY A7M3",
+    "category": "CAMERA",
+    "quantity": 3,
+    "purchaseCost": 10000000,
+    "rate": 140000
+  },
+  {
+    "name": "CANON R6III",
+    "category": "CAMERA",
+    "quantity": 1,
+    "purchaseCost": 23500000,
+    "rate": null
+  },
+  {
+    "name": "CANON 3000D",
+    "category": "CAMERA",
+    "quantity": 1,
+    "purchaseCost": 2800000,
+    "rate": null
+  },
+  {
+    "name": "INSTA 360 P4C",
+    "category": "CAMERA",
+    "quantity": 1,
+    "purchaseCost": 7000000,
+    "rate": null
+  },
+  {
+    "name": "RONIN RS3",
+    "category": "GIMBAL",
+    "quantity": 1,
+    "purchaseCost": 4250000,
+    "rate": 100000
+  },
+  {
+    "name": "RONIN RS5",
+    "category": "GIMBAL",
+    "quantity": 1,
+    "purchaseCost": 5500000,
+    "rate": 130000
+  },
+  {
+    "name": "RONIN RS4 MINI",
+    "category": "GIMBAL",
+    "quantity": 1,
+    "purchaseCost": 2500000,
+    "rate": 120000
+  },
+  {
+    "name": "HOLLYLAND LARK M2",
+    "category": "MIC",
+    "quantity": 3,
+    "purchaseCost": 1100000,
+    "rate": 30000
+  },
+  {
+    "name": "DJI MIC MINI",
+    "category": "MIC",
+    "quantity": 1,
+    "purchaseCost": 700000,
+    "rate": 50000
+  },
+  {
+    "name": "AMARAN 200X",
+    "category": "LIGHT",
+    "quantity": 2,
+    "purchaseCost": 4000000,
+    "rate": 70000
+  },
+  {
+    "name": "AMARAN 300C",
+    "category": "LIGHT",
+    "quantity": 2,
+    "purchaseCost": 5500000,
+    "rate": 80000
+  },
+  {
+    "name": "LITEMONS 300",
+    "category": "LIGHT",
+    "quantity": 1,
+    "purchaseCost": 3600000,
+    "rate": 60000
+  },
+  {
+    "name": "LITEMONS 150",
+    "category": "LIGHT",
+    "quantity": 1,
+    "purchaseCost": 2900000,
+    "rate": 50000
+  },
+  {
+    "name": "LC 500R",
+    "category": "LIGHT",
+    "quantity": 4,
+    "purchaseCost": 1300000,
+    "rate": 35000
+  },
+  {
+    "name": "AD200",
+    "category": "LIGHT",
+    "quantity": 8,
+    "purchaseCost": 2200000,
+    "rate": 50000
+  },
+  {
+    "name": "AD200 PRO",
+    "category": "LIGHT",
+    "quantity": 2,
+    "purchaseCost": 3100000,
+    "rate": 50000
+  },
+  {
+    "name": "GODOX V1",
+    "category": "LIGHT",
+    "quantity": 2,
+    "purchaseCost": 1500000,
+    "rate": 30000
+  },
+  {
+    "name": "GODOX TT",
+    "category": "LIGHT",
+    "quantity": 2,
+    "purchaseCost": 400000,
+    "rate": null
+  },
+  {
+    "name": "LILIPUT MONITOR",
+    "category": "OTHER",
+    "quantity": 1,
+    "purchaseCost": 1500000,
+    "rate": null
+  },
+  {
+    "name": "TELE PROMPTER",
+    "category": "OTHER",
+    "quantity": 1,
+    "purchaseCost": 800000,
+    "rate": null
+  },
+  {
+    "name": "SONY GM 50",
+    "category": "LENS",
+    "quantity": 1,
+    "purchaseCost": 15000000,
+    "rate": 120000
+  },
+  {
+    "name": "SONY GM85",
+    "category": "LENS",
+    "quantity": 2,
+    "purchaseCost": 11000000,
+    "rate": 100000
+  },
+  {
+    "name": "SONY GM24",
+    "category": "LENS",
+    "quantity": 1,
+    "purchaseCost": 10000000,
+    "rate": 100000
+  },
+  {
+    "name": "SONY GM 35",
+    "category": "LENS",
+    "quantity": 1,
+    "purchaseCost": 13000000,
+    "rate": 120000
+  },
+  {
+    "name": "SONY GM 24-70",
+    "category": "LENS",
+    "quantity": 1,
+    "purchaseCost": 17000000,
+    "rate": 100000
+  },
+  {
+    "name": "SONY GM 16-35",
+    "category": "LENS",
+    "quantity": 1,
+    "purchaseCost": 20000000,
+    "rate": null
+  },
+  {
+    "name": "SONY 24-105",
+    "category": "LENS",
+    "quantity": 2,
+    "purchaseCost": 8000000,
+    "rate": 70000
+  },
+  {
+    "name": "SONY 85 F/1.8",
+    "category": "LENS",
+    "quantity": 2,
+    "purchaseCost": 3800000,
+    "rate": 50000
+  },
+  {
+    "name": "SONY 35 F/1.8",
+    "category": "LENS",
+    "quantity": 1,
+    "purchaseCost": 3600000,
+    "rate": 50000
+  },
+  {
+    "name": "SONY 50 F/1.8",
+    "category": "LENS",
+    "quantity": 2,
+    "purchaseCost": 1400000,
+    "rate": 40000
+  },
+  {
+    "name": "SIGMA 85 F/1.4",
+    "category": "LENS",
+    "quantity": 2,
+    "purchaseCost": 7500000,
+    "rate": 80000
+  },
+  {
+    "name": "SIGMA 35 F/1.4",
+    "category": "LENS",
+    "quantity": 2,
+    "purchaseCost": 6000000,
+    "rate": 70000
+  },
+  {
+    "name": "SIGMA 24-70 F/2.8",
+    "category": "LENS",
+    "quantity": 1,
+    "purchaseCost": 8000000,
+    "rate": 90000
+  },
+  {
+    "name": "BATIS 85 MM",
+    "category": "LENS",
+    "quantity": 2,
+    "purchaseCost": 4700000,
+    "rate": 50000
+  },
+  {
+    "name": "BATIS 25MM",
+    "category": "LENS",
+    "quantity": 1,
+    "purchaseCost": 6000000,
+    "rate": 60000
+  },
+  {
+    "name": "SONY BATTERY",
+    "category": "BATTERY",
+    "quantity": 16,
+    "purchaseCost": 550000,
+    "rate": 20000
+  },
+  {
+    "name": "CANON BATTERY",
+    "category": "BATTERY",
+    "quantity": 2,
+    "purchaseCost": 750000,
+    "rate": null
+  },
+  {
+    "name": "SONY TUF CARDS(64/128)",
+    "category": "CARD",
+    "quantity": 4,
+    "purchaseCost": 1800000,
+    "rate": null
+  },
+  {
+    "name": "SANDISK CARDS(128)",
+    "category": "CARD",
+    "quantity": 10,
+    "purchaseCost": 200000,
+    "rate": null
+  },
+  {
+    "name": "LEXAR CARDS(128)",
+    "category": "CARD",
+    "quantity": 2,
+    "purchaseCost": 700000,
+    "rate": null
+  },
+  {
+    "name": "LEXAR TYPE B 64",
+    "category": "CARD",
+    "quantity": 1,
+    "purchaseCost": 1600000,
+    "rate": null
+  }
+]

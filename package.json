@@ -1,0 +1,61 @@
+{
+  "name": "camnova-rentals",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --hostname 0.0.0.0",
+    "build": "next build",
+    "start": "next start --hostname 0.0.0.0",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx scripts/test-runner.ts",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:seed": "tsx prisma/seed.ts",
+    "test:e2e": "playwright test",
+    "format": "prettier --write app lib prisma/*.ts scripts tests *.ts *.json",
+    "setup": "bash scripts/setup.sh",
+    "env:init": "tsx scripts/env-init.ts",
+    "db:wait": "tsx scripts/wait-db.ts",
+    "db:backup": "bash scripts/backup.sh",
+    "user:password": "tsx scripts/password.ts",
+    "check:workbook": "tsx scripts/check-workbook.ts"
+  },
+  "dependencies": {
+    "@fontsource/inter": "^5.2.0",
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "^6.19.0",
+    "bcryptjs": "^3.0.0",
+    "dotenv": "^18.0.5",
+    "exceljs": "^4.4.0",
+    "lucide-react": "^0.468.0",
+    "next": "^16.0.0",
+    "next-auth": "^4.24.13",
+    "pdf-lib": "^1.17.1",
+    "pg": "^8.23.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "recharts": "^3.0.0",
+    "unzipper": "^0.12.5",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@tailwindcss/postcss": "^4.1.0",
+    "@types/node": "^24.0.0",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/unzipper": "^0.10.11",
+    "prettier": "^3.9.9",
+    "prisma": "^6.19.0",
+    "tailwindcss": "^4.1.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0"
+  },
+  "overrides": {
+    "deepmerge-ts": "^8.0.0",
+    "exceljs": {
+      "uuid": "^11.1.1"
+    }
+  }
+}

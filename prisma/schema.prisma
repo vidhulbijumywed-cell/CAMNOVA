@@ -1,0 +1,173 @@
+generator client {
+  provider = "prisma-client-js"
+  engineType = "client"
+}
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+model User {
+  id String @id @default(cuid())
+  email String @unique
+  name String
+  passwordHash String
+  role String @default("STAFF")
+  active Boolean @default(true)
+  sessionVersion Int @default(0)
+  createdAt DateTime @default(now())
+}
+model Customer {
+  id String @id @default(cuid())
+  name String
+  phones String[] @default([])
+  rawPhone String @default("")
+  email String @default("")
+  notes String @default("")
+  referral String @default("")
+  importId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  bookings Booking[]
+}
+model Equipment {
+  id String @id @default(cuid())
+  name String @unique
+  category String
+  rate Int?
+  purchaseCost Int @default(0)
+  notes String @default("")
+  importId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  assets Asset[]
+  items BookingItem[]
+}
+model Asset {
+  id String @id @default(cuid())
+  equipmentId String
+  equipment Equipment @relation(fields:[equipmentId], references:[id], onDelete:Cascade)
+  serial String?
+  purchaseDate DateTime?
+  purchaseCost Int @default(0)
+  status String @default("AVAILABLE")
+  condition String @default("Not inspected")
+  accessories String @default("")
+  notes String @default("")
+}
+model Booking {
+  id Int @id @default(autoincrement())
+  customerId String?
+  customer Customer? @relation(fields:[customerId],references:[id])
+  bookingDate DateTime @default(now())
+  pickupAt DateTime?
+  actualPickupAt DateTime?
+  returnAt DateTime?
+  actualReturnAt DateTime?
+  dueAt DateTime?
+  status String @default("DRAFT")
+  total Int?
+  discount Int @default(0)
+  negotiated Boolean @default(false)
+  equipmentText String @default("")
+  referral String @default("")
+  notes String @default("")
+  warnings String[] @default([])
+  historical Boolean @default(false)
+  sourceRef String?
+  sourceRow Int?
+  importId String?
+  followupNote String @default("")
+  followupAt DateTime?
+  checklist Json @default("{}")
+  version Int @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  items BookingItem[]
+  payments Payment[]
+  outsourced Outsource[]
+  @@index([bookingDate])
+  @@index([pickupAt,returnAt])
+}
+model BookingItem {
+  id String @id @default(cuid())
+  bookingId Int
+  booking Booking @relation(fields:[bookingId],references:[id],onDelete:Cascade)
+  equipmentId String
+  equipment Equipment @relation(fields:[equipmentId],references:[id])
+  quantity Int
+  returned Int @default(0)
+  rate Int
+  days Int
+  @@index([equipmentId])
+}
+model Payment {
+  id String @id @default(cuid())
+  bookingId Int
+  booking Booking @relation(fields:[bookingId],references:[id],onDelete:Cascade)
+  amount Int
+  kind String @default("RENTAL")
+  mode String
+  paidAt DateTime?
+  reference String @default("")
+  notes String @default("")
+  recordedBy String
+  reversesId String? @unique
+  reviewedCredit Boolean @default(false)
+  createdAt DateTime @default(now())
+}
+model Vendor {
+  id String @id @default(cuid())
+  name String
+  phone String @default("")
+  notes String @default("")
+  outsourced Outsource[]
+}
+model Outsource {
+  id String @id @default(cuid())
+  bookingId Int
+  booking Booking @relation(fields:[bookingId],references:[id],onDelete:Cascade)
+  vendorId String?
+  vendor Vendor? @relation(fields:[vendorId],references:[id])
+  description String
+  cost Int
+  payments VendorPayment[]
+}
+model VendorPayment {
+  id String @id @default(cuid())
+  outsourceId String
+  outsource Outsource @relation(fields:[outsourceId],references:[id],onDelete:Cascade)
+  amount Int
+  paidAt DateTime?
+  mode String
+  notes String @default("")
+  recordedBy String
+  createdAt DateTime @default(now())
+}
+model ImportBatch {
+  id String @id @default(cuid())
+  hash String @unique
+  name String
+  summary Json
+  createdAt DateTime @default(now())
+  rolledBackAt DateTime?
+}
+model Audit {
+  id String @id @default(cuid())
+  actor String
+  action String
+  entity String
+  entityId String
+  detail Json
+  createdAt DateTime @default(now())
+  @@index([entity,entityId])
+}
+model Setting {
+  id String @id @default("business")
+  value Json
+  updatedAt DateTime @updatedAt
+}
+model LoginAttempt {
+  id String @id
+  count Int @default(0)
+  resetAt DateTime
+}

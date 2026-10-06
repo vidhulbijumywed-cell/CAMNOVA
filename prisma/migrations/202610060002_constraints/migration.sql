@@ -1,0 +1,10 @@
+ALTER TABLE "User" ADD CONSTRAINT "User_role_check" CHECK ("role" IN ('ADMIN','STAFF'));
+ALTER TABLE "Booking" ADD CONSTRAINT "Booking_status_check" CHECK ("status" IN ('DRAFT','BOOKED','PICKED_UP','RETURNED','CANCELLED'));
+ALTER TABLE "Booking" ADD CONSTRAINT "Booking_money_check" CHECK (("total" IS NULL OR "total" >= 0) AND "discount" >= 0);
+ALTER TABLE "BookingItem" ADD CONSTRAINT "BookingItem_quantity_check" CHECK ("quantity" > 0 AND "returned" >= 0 AND "returned" <= "quantity" AND "rate" >= 0 AND "days" > 0);
+ALTER TABLE "Equipment" ADD CONSTRAINT "Equipment_cost_check" CHECK (("rate" IS NULL OR "rate" >= 0) AND "purchaseCost" >= 0);
+ALTER TABLE "Asset" ADD CONSTRAINT "Asset_status_check" CHECK ("status" IN ('AVAILABLE','MAINTENANCE','RETIRED'));
+ALTER TABLE "Asset" ADD CONSTRAINT "Asset_cost_check" CHECK ("purchaseCost" >= 0);
+ALTER TABLE "Payment" ADD CONSTRAINT "Payment_kind_check" CHECK ("kind" IN ('RENTAL','DEPOSIT') AND "mode" IN ('UPI','Bank','Cash','Not recorded') AND "amount" <> 0);
+ALTER TABLE "Outsource" ADD CONSTRAINT "Outsource_cost_check" CHECK ("cost" >= 0);
+ALTER TABLE "VendorPayment" ADD CONSTRAINT "VendorPayment_amount_check" CHECK ("amount" > 0 AND "mode" IN ('UPI','Bank','Cash','Not recorded'));
