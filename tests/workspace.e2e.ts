@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { bookingNumber } from "../lib/domain";
 import { readFileSync } from "node:fs";
 async function login(page: Page, staff = false) {
   await page.goto("/login");
@@ -324,4 +325,60 @@ test("disabling and re-enabling an account revokes its existing session", async 
     });
     await ctx.close();
   }
+});
+
+test("staff confirms a request directly and owner deletes it from the booking list", async ({
+  page,
+}) => {
+  await login(page, true);
+  const snapshot = await (
+    await page.request.get("/api/snapshot?month=2026-10")
+  ).json();
+  const equipment = snapshot.inventory.find(
+    (e: { rate: number | null; assets: { status: string }[] }) =>
+      e.rate !== null && e.assets.some((a) => a.status === "AVAILABLE"),
+  );
+  const response = await page.request.post("/api/bookings", {
+    headers: { Origin: new URL(process.env.NEXTAUTH_URL!).origin },
+    data: {
+      customerId: snapshot.customers[0].id,
+      status: "DRAFT",
+      pickupAt: "2028-01-10T10:00:00+05:30",
+      returnAt: "2028-01-11T10:00:00+05:30",
+      items: [{ equipmentId: equipment.id, quantity: 1 }],
+    },
+  });
+  expect(response.ok()).toBeTruthy();
+  const b = await response.json();
+  await page.reload();
+  await page.getByRole("button", { name: "Bookings", exact: true }).click();
+  await page.getByRole("button", { name: /Booking requests \(\d+\)/ }).click();
+  const target = page
+    .locator("tr")
+    .filter({
+      has: page.getByRole("button", {
+        name: `View ${bookingNumber(b.id)}`,
+        exact: true,
+      }),
+    });
+  await target
+    .getByRole("button", { name: "Review & confirm", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Confirm booking", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  const fresh = await (
+    await page.request.get("/api/snapshot?month=2026-10")
+  ).json();
+  expect(fresh.bookings.find((x: { id: number }) => x.id === b.id).status).toBe(
+    "BOOKED",
+  );
+  await login(page);
+  await page.getByRole("button", { name: "Bookings", exact: true }).click();
+  await target.getByRole("button", { name: "Delete", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Delete booking", exact: true })
+    .click();
+  await expect(target).toHaveCount(0);
 });

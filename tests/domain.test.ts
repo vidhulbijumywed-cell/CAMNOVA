@@ -845,3 +845,41 @@ test("staff confirms without payment; only owners can remove payments and bookin
     1,
   );
 });
+
+test("staff can quote an unpriced request and owner can remove a mistaken paid booking in one action", async () => {
+  const b = await saveBooking(staff, { ...body(), status: "DRAFT" });
+  await db.booking.update({ where: { id: b.id }, data: { total: null } });
+  await bookingAction(staff, b.id, {
+    action: "CONFIRM",
+    version: b.version,
+    total: 150000,
+  });
+  let record = await db.booking.findUniqueOrThrow({
+    where: { id: b.id },
+    include: includeBooking,
+  });
+  assert.equal(record.status, "BOOKED");
+  assert.equal(record.total, 150000);
+  await addPayment(staff, b.id, {
+    amount: 10000,
+    kind: "RENTAL",
+    mode: "Cash",
+    paidAt: pickup,
+  });
+  record = await db.booking.findUniqueOrThrow({
+    where: { id: b.id },
+    include: includeBooking,
+  });
+  await bookingAction(owner, b.id, {
+    action: "DELETE",
+    version: record.version,
+    notes: "Duplicate booking",
+    removePayments: true,
+  });
+  record = await db.booking.findUniqueOrThrow({
+    where: { id: b.id },
+    include: includeBooking,
+  });
+  assert.equal(record.status, "DELETED");
+  assert.equal(ledger(record.payments, record.total).paid, 0);
+});

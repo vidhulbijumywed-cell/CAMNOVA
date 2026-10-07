@@ -263,7 +263,7 @@ export default function Workspace({ initial }: { initial: Data }) {
     setBusy(true);
     setError("");
     try {
-      const r = await fetch(`/api/${path}`, {
+      const r = await fetch(`/api/${path.replace(/^\/api\//, "")}`, {
         method: "POST",
         headers:
           body instanceof FormData
@@ -319,6 +319,20 @@ export default function Workspace({ initial }: { initial: Data }) {
       `${bookingNumber(b.id)} ${b.customer?.name} ${b.equipmentText} ${b.items.map((i) => i.equipment.name).join(" ")} ${b.customer?.phones.join(" ")}`,
     ) &&
     (filter === "All" || b.status === filter || b.paymentStatus === filter);
+  const pendingRequests = data.bookings.filter(
+    (b) => b.status === "DRAFT" && !b.historical,
+  );
+  useEffect(() => {
+    const refresh = () => {
+      if (!document.hidden) reload().catch(() => {});
+    };
+    const timer = window.setInterval(refresh, 30000);
+    window.addEventListener("focus", refresh);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("focus", refresh);
+    };
+  }, [month]);
   const outstanding = data.bookings
     .filter(
       (b) =>
@@ -428,6 +442,22 @@ export default function Workspace({ initial }: { initial: Data }) {
                   </td>
                 )}
                 <td>
+                  {b.status === "DRAFT" && !b.historical && (
+                    <button
+                      className="primary"
+                      onClick={() => open("confirm", b)}
+                    >
+                      Review & confirm
+                    </button>
+                  )}
+                  {owner && !compact && (
+                    <button
+                      className="button danger"
+                      onClick={() => open("delete", b)}
+                    >
+                      Delete
+                    </button>
+                  )}
                   <button
                     className="icon-button"
                     aria-label={`View ${bookingNumber(b.id)}`}
@@ -512,6 +542,11 @@ export default function Workspace({ initial }: { initial: Data }) {
             >
               <Icon size={18} />
               <span>{label}</span>
+              {label === "Bookings" && pendingRequests.length > 0 && (
+                <em aria-label={`${pendingRequests.length} pending requests`}>
+                  {pendingRequests.length}
+                </em>
+              )}
               {label === "Collections" && outstanding.length > 0 && (
                 <em>{outstanding.length}</em>
               )}
@@ -851,6 +886,27 @@ export default function Workspace({ initial }: { initial: Data }) {
                   <option>Paid</option>
                 </select>,
               )}
+              <div className="detail-actions">
+                <button
+                  className={filter === "DRAFT" ? "primary" : "button"}
+                  onClick={() => {
+                    setFilter("DRAFT");
+                    setQuery("");
+                  }}
+                >
+                  Booking requests ({pendingRequests.length})
+                </button>
+                <button
+                  className={filter === "All" ? "primary" : "button"}
+                  onClick={() => setFilter("All")}
+                >
+                  All bookings
+                </button>
+                <small>
+                  Staff can confirm requests directly. Payment can be collected
+                  later.
+                </small>
+              </div>
               {bookingTable(data.bookings.filter(bookingMatches))}
             </section>
           )}
@@ -1708,6 +1764,8 @@ export default function Workspace({ initial }: { initial: Data }) {
                     pickup: "Pickup checklist",
                     return: "Return checklist",
                     extend: "Extend rental",
+                    confirm: "Confirm booking",
+                    delete: "Delete booking",
                     cancel: "Cancel booking",
                     rollback: "Rollback import",
                     "vendor-payment": "Vendor payment",
@@ -1720,6 +1778,122 @@ export default function Workspace({ initial }: { initial: Data }) {
             <p role="alert" className="error banner">
               {error}
             </p>
+          )}
+          {dialog.kind === "confirm" && b && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const fields = new FormData(e.currentTarget);
+                submit(`bookings/${b.id}/action`, {
+                  action: "CONFIRM",
+                  version: b.version,
+                  ...(b.total === null
+                    ? { total: Math.round(Number(fields.get("total")) * 100) }
+                    : {}),
+                });
+              }}
+            >
+              <h3>
+                {b.customer?.name ?? "Customer details needed"} ·{" "}
+                {bookingNumber(b.id)}
+              </h3>
+              <p>
+                {date(b.pickupAt, true)} → {date(b.returnAt, true)}
+              </p>
+              {b.items.map((i) => (
+                <p key={i.id}>
+                  {i.equipment.name} × {i.quantity}
+                </p>
+              ))}
+              {b.total === null ? (
+                <label>
+                  Agreed rental total (₹)
+                  <input
+                    name="total"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    required
+                  />
+                </label>
+              ) : (
+                <h3>Rental total: {money(b.total)}</h3>
+              )}
+              <p>
+                You can confirm this booking yourself. No owner approval or
+                payment is required. Confirmation reserves the equipment.
+              </p>
+              <div className="detail-actions">
+                <button
+                  className="primary"
+                  disabled={
+                    busy ||
+                    !b.customerId ||
+                    !b.pickupAt ||
+                    !b.returnAt ||
+                    !b.items.length
+                  }
+                >
+                  {busy ? "Confirming…" : "Confirm booking"}
+                </button>
+                <button
+                  type="button"
+                  className="button"
+                  onClick={() => open("booking", b)}
+                >
+                  Change details
+                </button>
+              </div>
+            </form>
+          )}
+          {dialog.kind === "delete" && b && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const fields = new FormData(e.currentTarget);
+                submit(`bookings/${b.id}/action`, {
+                  action: "DELETE",
+                  version: b.version,
+                  notes: String(fields.get("notes") || "Mistaken booking"),
+                  removePayments: fields.get("removePayments") === "on",
+                });
+              }}
+            >
+              <h3>
+                {bookingNumber(b.id)} · {b.customer?.name}
+              </h3>
+              <p>
+                This removes the booking from active records and releases
+                reserved gear. The audit history is kept.
+              </p>
+              {b.payments.some(
+                (p) =>
+                  !p.reversesId &&
+                  !b.payments.some((x) => x.reversesId === p.id),
+              ) && (
+                <label>
+                  <input type="checkbox" name="removePayments" required /> Also
+                  remove this booking’s payment entries as mistakes. This does
+                  not send a refund.
+                </label>
+              )}
+              <label>
+                Reason (optional)
+                <input
+                  name="notes"
+                  placeholder="Mistaken booking"
+                  maxLength={5000}
+                />
+              </label>
+              <div className="detail-actions">
+                <button className="button danger" disabled={busy}>
+                  {busy ? "Deleting…" : "Delete booking"}
+                </button>
+                <button type="button" className="button" onClick={close}>
+                  Keep booking
+                </button>
+              </div>
+            </form>
           )}
           {dialog.kind === "booking" && (
             <BookingForm
@@ -1902,35 +2076,15 @@ export default function Workspace({ initial }: { initial: Data }) {
                 {b.status === "DRAFT" && (
                   <button
                     className="primary"
-                    onClick={() => {
-                      if (
-                        window.confirm(
-                          "Confirm this booking and reserve the gear? No payment is required.",
-                        )
-                      )
-                        submit(`/api/bookings/${b.id}/action`, {
-                          action: "CONFIRM",
-                          version: b.version,
-                        });
-                    }}
+                    onClick={() => open("confirm", b)}
                   >
-                    Confirm booking (payment optional)
+                    Review & confirm booking
                   </button>
                 )}
                 {owner && (
                   <button
                     className="button danger"
-                    onClick={() => {
-                      const notes = window.prompt(
-                        "Delete this booking from active records? Enter a correction reason. Audit history is preserved.",
-                      );
-                      if (notes?.trim())
-                        submit(`/api/bookings/${b.id}/action`, {
-                          action: "DELETE",
-                          version: b.version,
-                          notes,
-                        });
-                    }}
+                    onClick={() => open("delete", b)}
                   >
                     Delete booking
                   </button>

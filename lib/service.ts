@@ -456,6 +456,8 @@ export async function bookingAction(a: Actor, id: number, input: unknown) {
   const v = z
     .object({
       version: z.number().int().optional(),
+      total: z.number().int().min(0).max(2_000_000_000).optional(),
+      removePayments: z.boolean().default(false),
       paymentId: z.string().optional(),
       action: z.enum([
         "PICKUP",
@@ -497,7 +499,7 @@ export async function bookingAction(a: Actor, id: number, input: unknown) {
         !b.pickupAt ||
         !b.returnAt ||
         !b.items.length ||
-        b.total === null
+        (b.total === null && v.total === undefined)
       )
         throw new HttpError(
           400,
@@ -548,21 +550,44 @@ export async function bookingAction(a: Actor, id: number, input: unknown) {
         b.items.some((i) => i.returned < i.quantity && b.actualPickupAt)
       )
         throw new HttpError(409, "Return issued equipment first");
-      if (
-        b.payments.some(
-          (p) =>
-            !p.reversesId && !b.payments.some((x) => x.reversesId === p.id),
-        ) ||
-        b.outsourced.some((o) => o.payments.length)
-      )
+      if (b.outsourced.some((o) => o.payments.length))
         throw new HttpError(
           409,
-          "Correct or remove payment entries before deleting this booking",
+          "This booking has vendor payments. Correct those entries before deleting.",
         );
+      const activePayments = b.payments.filter(
+        (p) => !p.reversesId && !b.payments.some((x) => x.reversesId === p.id),
+      );
+      if (activePayments.length && !v.removePayments)
+        throw new HttpError(
+          409,
+          "Choose to remove mistaken payment entries before deleting.",
+        );
+      for (const p of activePayments) {
+        await tx.payment.create({
+          data: {
+            bookingId: id,
+            amount: -p.amount,
+            kind: p.kind,
+            mode: p.mode,
+            paidAt: p.paidAt,
+            reference: p.reference,
+            notes: `Removed with booking: ${v.notes}`,
+            recordedBy: a.id,
+            reversesId: p.id,
+          },
+        });
+      }
     }
     const checklist = b.checklist as { events?: object[] };
     const changes: Prisma.BookingUpdateInput = { version: { increment: 1 } };
-    if (v.action === "CONFIRM") changes.status = "BOOKED";
+    if (v.action === "CONFIRM") {
+      changes.status = "BOOKED";
+      if (b.total === null && v.total !== undefined) {
+        changes.total = v.total;
+        changes.negotiated = true;
+      }
+    }
     if (v.action === "DELETE") changes.status = "DELETED";
     if (v.action === "FOLLOWUP") {
       changes.followupNote = v.notes;
