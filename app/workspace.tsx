@@ -58,6 +58,7 @@ import {
 } from "recharts";
 import { bookingNumber, money, defaultSettings } from "@/lib/domain";
 import type { snapshot } from "@/lib/service";
+import ProductPhotoEditor, { productPhotoUrl } from "./product-photo";
 type Json<T> = T extends Date
   ? string
   : T extends Array<infer U>
@@ -1056,7 +1057,15 @@ export default function Workspace({ initial }: { initial: Data }) {
                           onClick={() => open("assets", e)}
                         >
                           <div className="equipment-visual">
-                            <EquipmentIcon category={e.category} />
+                            {e.photo ? (
+                              <img
+                                src={productPhotoUrl(e.id, e.photo.updatedAt)}
+                                alt={e.name}
+                                loading="lazy"
+                              />
+                            ) : (
+                              <EquipmentIcon category={e.category} />
+                            )}
                             <span className="category-label">{e.category}</span>
                           </div>
                           <div className="equipment-body">
@@ -2031,6 +2040,16 @@ export default function Workspace({ initial }: { initial: Data }) {
           )}
           {dialog.kind === "assets" && (
             <>
+              {(dialog.record as Equipment).photo && (
+                <img
+                  className="product-photo-preview"
+                  src={productPhotoUrl(
+                    (dialog.record as Equipment).id,
+                    (dialog.record as Equipment).photo!.updatedAt,
+                  )}
+                  alt={(dialog.record as Equipment).name}
+                />
+              )}
               <div className="detail-actions">
                 {owner && (
                   <button
@@ -2556,10 +2575,14 @@ function EntityForm({
   submit: (v: unknown) => unknown;
 }) {
   const r = (record ?? {}) as Record<string, unknown>;
+  const [photo, setPhoto] = useState<string | null | undefined>(undefined);
+  const [preparingPhoto, setPreparingPhoto] = useState(false);
+  const existingPhoto = r.photo as { updatedAt: string } | null | undefined;
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
+        if (busy || preparingPhoto) return;
         const f = new FormData(e.currentTarget);
         const body: Record<string, unknown> = { id: r.id, name: f.get("name") };
         if (kind === "customer")
@@ -2582,6 +2605,7 @@ function EntityForm({
             rate: paise(f.get("rate")),
             purchaseCost: paise(f.get("purchaseCost")) ?? 0,
             notes: f.get("notes"),
+            ...(photo !== undefined ? { photo } : {}),
           });
         if (kind === "user")
           Object.assign(body, {
@@ -2675,6 +2699,16 @@ function EntityForm({
                 defaultValue={rupees((r.purchaseCost as number) ?? 0)}
               />
             </Field>
+            <ProductPhotoEditor
+              existingUrl={
+                existingPhoto
+                  ? productPhotoUrl(String(r.id), existingPhoto.updatedAt)
+                  : undefined
+              }
+              disabled={busy}
+              onChange={setPhoto}
+              onPreparing={setPreparingPhoto}
+            />
           </>
         )}
         {kind === "user" && (
@@ -2718,7 +2752,7 @@ function EntityForm({
           </Field>
         )}
       </div>
-      <FormFooter busy={busy} />
+      <FormFooter busy={busy || preparingPhoto} />
     </form>
   );
 }

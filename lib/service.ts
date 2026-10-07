@@ -3,6 +3,7 @@ import { z } from "zod";
 import { hash } from "bcryptjs";
 import { db } from "./db";
 import { admin, Actor, HttpError } from "./auth";
+import { decodeProductPhoto } from "./product-photo";
 import {
   defaultSettings,
   BusinessSettings,
@@ -599,9 +600,10 @@ export async function saveEntity(a: Actor, entity: string, input: unknown) {
           rate: amount.nullable(),
           purchaseCost: amount,
           notes: z.string().max(5000).default(""),
+          photo: z.string().max(1400000).nullable().optional(),
         })
         .parse(input);
-      const { id, quantity, ...data } = v;
+      const { id, quantity, photo, ...data } = v;
       const old = id
         ? await tx.equipment.findUnique({
             where: { id },
@@ -616,6 +618,20 @@ export async function saveEntity(a: Actor, entity: string, input: unknown) {
       const result = id
         ? await tx.equipment.update({ where: { id }, data })
         : await tx.equipment.create({ data });
+      if (photo !== undefined) {
+        if (photo === null) {
+          await tx.equipmentPhoto.deleteMany({
+            where: { equipmentId: result.id },
+          });
+        } else {
+          const bytes = new Uint8Array(decodeProductPhoto(photo));
+          await tx.equipmentPhoto.upsert({
+            where: { equipmentId: result.id },
+            create: { equipmentId: result.id, data: bytes },
+            update: { data: bytes },
+          });
+        }
+      }
       if (quantity > (old?.assets.length ?? 0))
         await tx.asset.createMany({
           data: Array.from(
@@ -627,6 +643,9 @@ export async function saveEntity(a: Actor, entity: string, input: unknown) {
         name: data.name,
         quantity,
         rate: data.rate,
+        ...(photo !== undefined
+          ? { photo: photo === null ? "removed" : "updated" }
+          : {}),
       });
       return result;
     }
@@ -797,7 +816,7 @@ export async function snapshot(a: Actor, month: string) {
         orderBy: { bookingDate: "desc" },
       }),
       db.equipment.findMany({
-        include: { assets: true },
+        include: { assets: true, photo: { select: { updatedAt: true } } },
         orderBy: { category: "asc" },
       }),
       db.customer.findMany({ orderBy: { name: "asc" } }),

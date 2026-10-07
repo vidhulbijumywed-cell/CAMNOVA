@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { test, beforeEach, after } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import ExcelJS from "exceljs";
 import { db } from "../lib/db";
 import { PrismaClient } from "@prisma/client";
@@ -23,6 +24,7 @@ import {
   defaultSettings,
 } from "../lib/domain";
 import { documentPdf, exportSheet } from "../lib/documents";
+import { decodeProductPhoto, MAX_PHOTO_BYTES } from "../lib/product-photo";
 if (!new URL(process.env.DATABASE_URL!).pathname.endsWith("_test"))
   throw new Error("Tests require an isolated _test database");
 const owner: Actor = {
@@ -87,6 +89,98 @@ beforeEach(async () => {
   await db.setting.create({ data: { value: defaultSettings } });
 });
 after(() => db.$disconnect());
+test("product photos persist, stay out of snapshots, preserve on edit, replace and remove", async () => {
+  const image = readFileSync(
+    new URL("./fixtures/product.jpg", import.meta.url),
+  );
+  const photo = `data:image/jpeg;base64,${image.toString("base64")}`;
+  const input = {
+    id: equipmentId,
+    name: "Test Camera",
+    category: "CAMERA",
+    quantity: 1,
+    rate: 100000,
+    purchaseCost: 20000000,
+    photo,
+  };
+  await assert.rejects(
+    saveEntity(staff, "inventory", input),
+    /Owner permission required/,
+  );
+  await saveEntity(owner, "inventory", input);
+  const stored = await db.equipmentPhoto.findUniqueOrThrow({
+    where: { equipmentId },
+  });
+  assert.deepEqual(Buffer.from(stored.data), image);
+  const snap = await snapshot(staff, "2026-11");
+  const item = snap.inventory.find((e) => e.id === equipmentId)!;
+  assert.ok(item.photo?.updatedAt);
+  assert.equal("data" in item.photo!, false);
+  const { photo: _, ...withoutPhoto } = input;
+  await saveEntity(owner, "inventory", {
+    ...withoutPhoto,
+    notes: "Updated notes",
+  });
+  assert.equal(await db.equipmentPhoto.count(), 1);
+  await assert.rejects(
+    saveEntity(owner, "inventory", {
+      ...input,
+      name: "Should roll back",
+      photo: "data:image/jpeg;base64,bm90IGEgcGhvdG8=",
+    }),
+    /Invalid JPEG/,
+  );
+  assert.equal(
+    (await db.equipment.findUniqueOrThrow({ where: { id: equipmentId } })).name,
+    "Test Camera",
+  );
+  await saveEntity(owner, "inventory", input);
+  assert.deepEqual(
+    Buffer.from(
+      (await db.equipmentPhoto.findUniqueOrThrow({ where: { equipmentId } }))
+        .data,
+    ),
+    image,
+  );
+  await saveEntity(owner, "inventory", { ...input, photo: null });
+  assert.equal(await db.equipmentPhoto.count(), 0);
+  await saveEntity(owner, "inventory", {
+    ...withoutPhoto,
+    id: undefined,
+    name: "New photographed equipment",
+    photo,
+  });
+  assert.equal(await db.equipmentPhoto.count(), 1);
+});
+test("photo uploads reject active content, oversized data, corrupt images and oversized dimensions", () => {
+  const image = readFileSync(
+    new URL("./fixtures/product.jpg", import.meta.url),
+  );
+  const encode = (bytes: Buffer) =>
+    `data:image/jpeg;base64,${bytes.toString("base64")}`;
+  assert.deepEqual(decodeProductPhoto(encode(image)), image);
+  assert.throws(
+    () => decodeProductPhoto("data:image/svg+xml;base64,PHN2Zz4="),
+    /JPEG/,
+  );
+  assert.throws(
+    () => decodeProductPhoto(encode(Buffer.alloc(MAX_PHOTO_BYTES + 1))),
+    /at most 1 MB/,
+  );
+  assert.throws(
+    () => decodeProductPhoto(encode(Buffer.from([255, 216, 255, 217]))),
+    /Invalid JPEG/,
+  );
+  assert.throws(
+    () => decodeProductPhoto(encode(image.subarray(0, image.length - 2))),
+    /Invalid JPEG/,
+  );
+  const oversized = Buffer.from(image);
+  const startOfFrame = oversized.indexOf(Buffer.from([0xff, 0xc0]));
+  assert.ok(startOfFrame >= 0);
+  oversized.writeUInt16BE(2000, startOfFrame + 7);
+  assert.throws(() => decodeProductPhoto(encode(oversized)), /1600 pixels/);
+});
 test("exact currency parsing and rental-day rules reject malformed amounts", () => {
   assert.equal(toPaise("Rs. 1,500/-"), 150000);
   assert.equal(toPaise("0.10"), 10);

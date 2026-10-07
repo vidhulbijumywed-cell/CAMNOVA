@@ -12,6 +12,7 @@ import {
 import { previewImport, commitImport, rollbackImport } from "@/lib/importer";
 import { documentPdf, exportSheet } from "@/lib/documents";
 import { ZodError } from "zod";
+import { db } from "@/lib/db";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 async function handle(
@@ -33,6 +34,19 @@ async function handle(
         throw new HttpError(413, "Request too large");
     }
     if (req.method === "GET") {
+      if (path[0] === "product-photo" && path.length === 2) {
+        const photo = await db.equipmentPhoto.findUnique({
+          where: { equipmentId: path[1] },
+        });
+        if (!photo) throw new HttpError(404, "Product photo not found");
+        return new Response(new Uint8Array(photo.data), {
+          headers: {
+            "Content-Type": "image/jpeg",
+            "X-Content-Type-Options": "nosniff",
+            "Cache-Control": "private, no-store",
+          },
+        });
+      }
       if (path[0] === "snapshot")
         return NextResponse.json(
           await snapshot(

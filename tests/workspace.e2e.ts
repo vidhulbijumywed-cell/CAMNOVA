@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { readFileSync } from "node:fs";
 async function login(page: Page, staff = false) {
   await page.goto("/login");
   await page
@@ -12,6 +13,108 @@ async function login(page: Page, staff = false) {
     page.getByRole("heading", { name: "Your business, in focus." }),
   ).toBeVisible();
 }
+test("owner uploads, replaces and removes durable inventory photos; staff can only view", async ({
+  page,
+  browser,
+}) => {
+  await login(page);
+  await page.getByRole("button", { name: "Inventory", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Add equipment", exact: true })
+    .click();
+  const name = `Photo Test Camera ${Date.now()}`;
+  await page.getByLabel("Name", { exact: true }).fill(name);
+  await page.getByLabel("Daily rate (₹, blank = not set)").fill("100");
+  await page
+    .getByLabel("Product photo", { exact: true })
+    .setInputFiles("public/logo.png");
+  const preview = page.getByAltText("Product photo preview");
+  await expect(preview).toBeVisible();
+  await page.getByRole("button", { name: "Save changes" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  const card = page.locator(".equipment-card").filter({ hasText: name });
+  const photo = card.getByAltText(name, { exact: true });
+  await expect(photo).toBeVisible();
+  await expect(photo).toHaveJSProperty("naturalWidth", 1600);
+  const src = (await photo.getAttribute("src"))!;
+  expect((await page.request.get(src)).headers()["content-type"]).toBe(
+    "image/jpeg",
+  );
+  const anonymous = await browser.newContext();
+  expect(
+    (
+      await anonymous.request.get(
+        new URL(src, process.env.NEXTAUTH_URL!).toString(),
+      )
+    ).status(),
+  ).toBe(401);
+  await anonymous.close();
+  const staffContext = await browser.newContext();
+  const staffPage = await staffContext.newPage();
+  try {
+    await login(staffPage, true);
+    await staffPage
+      .getByRole("button", { name: "Inventory", exact: true })
+      .click();
+    const staffCard = staffPage
+      .locator(".equipment-card")
+      .filter({ hasText: name });
+    await expect(staffCard.getByAltText(name, { exact: true })).toBeVisible();
+    await staffCard.click();
+    await expect(
+      staffPage.getByRole("button", { name: "Edit model / add units" }),
+    ).toHaveCount(0);
+    const id = decodeURIComponent(src.split("/").pop()!.split("?")[0]);
+    const jpeg = readFileSync("tests/fixtures/product.jpg").toString("base64");
+    expect(
+      (
+        await staffPage.request.post("/api/inventory", {
+          headers: { Origin: new URL(process.env.NEXTAUTH_URL!).origin },
+          data: {
+            id,
+            name,
+            category: "CAMERA",
+            quantity: 1,
+            rate: 10000,
+            purchaseCost: 0,
+            photo: `data:image/jpeg;base64,${jpeg}`,
+          },
+        })
+      ).status(),
+    ).toBe(403);
+  } finally {
+    await staffContext.close();
+  }
+  await page.reload();
+  await page.getByRole("button", { name: "Inventory", exact: true }).click();
+  await expect(card.getByAltText(name, { exact: true })).toBeVisible();
+  await card.click();
+  await page.getByRole("button", { name: "Edit model / add units" }).click();
+  await page.getByLabel("Product photo", { exact: true }).setInputFiles({
+    name: "invalid.svg",
+    mimeType: "image/svg+xml",
+    buffer: Buffer.from("<svg/>"),
+  });
+  const photoError = page.locator(".product-photo-editor").getByRole("alert");
+  await expect(photoError).toContainText("JPG, PNG, or WebP");
+  await page
+    .getByLabel("Product photo", { exact: true })
+    .setInputFiles("tests/fixtures/product.jpg");
+  await expect(photoError).toHaveCount(0);
+  await page.getByRole("button", { name: "Save changes" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(card.getByAltText(name, { exact: true })).toHaveJSProperty(
+    "naturalWidth",
+    10,
+  );
+  await card.click();
+  await page.getByRole("button", { name: "Edit model / add units" }).click();
+  await page.getByRole("button", { name: "Remove photo" }).click();
+  await page.getByRole("button", { name: "Save changes" }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(card.getByAltText(name, { exact: true })).toHaveCount(0);
+  expect((await page.request.get(src)).status()).toBe(404);
+});
 test("unauthenticated API is protected and login page renders", async ({
   page,
   request,

@@ -41,6 +41,13 @@ model Equipment {
   updatedAt DateTime @updatedAt
   assets Asset[]
   items BookingItem[]
+  photo EquipmentPhoto?
+}
+model EquipmentPhoto {
+  equipmentId String @id
+  equipment Equipment @relation(fields:[equipmentId], references:[id], onDelete:Cascade)
+  data Bytes
+  updatedAt DateTime @updatedAt
 }
 model Asset {
   id String @id @default(cuid())
