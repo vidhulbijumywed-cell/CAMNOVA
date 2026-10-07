@@ -4,6 +4,7 @@ import { db } from "./db";
 import { includeBooking, settings, snapshot } from "./service";
 import { bookingNumber, money, ledger, safeCell } from "./domain";
 import { HttpError } from "./auth";
+import { invoicePdf } from "./invoice";
 export async function exportSheet(
   kind: string,
   format: string,
@@ -183,6 +184,7 @@ export async function documentPdf(
     throw new HttpError(404, "Booking not found");
   const s = await settings(),
     l = ledger(b.payments, b.total);
+  if (kind === "invoice") return invoicePdf(b, s);
   const p = paymentId ? b.payments.find((p) => p.id === paymentId) : undefined;
   if (kind === "receipt" && !p)
     throw new HttpError(400, "Choose a payment for the receipt");
