@@ -9,6 +9,7 @@ export default async function Page() {
     a = await actor();
   } catch (e) {
     if (e instanceof HttpError && e.status === 401) redirect("/login");
+    if (e instanceof HttpError && e.status === 403) redirect("/rentals");
     throw e;
   }
   const month = new Date()

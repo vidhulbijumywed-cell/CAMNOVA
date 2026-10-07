@@ -28,6 +28,19 @@ model Customer {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   bookings Booking[]
+  account CustomerAccount?
+}
+model CustomerAccount {
+  id String @id @default(cuid())
+  email String @unique
+  name String
+  passwordHash String
+  active Boolean @default(true)
+  sessionVersion Int @default(0)
+  customerId String @unique
+  customer Customer @relation(fields:[customerId], references:[id])
+  createdAt DateTime @default(now())
+  bookings Booking[]
 }
 model Equipment {
   id String @id @default(cuid())
@@ -63,6 +76,9 @@ model Asset {
 }
 model Booking {
   id Int @id @default(autoincrement())
+  customerAccountId String?
+  customerAccount CustomerAccount? @relation(fields:[customerAccountId], references:[id])
+  requestKey String?
   customerId String?
   customer Customer? @relation(fields:[customerId],references:[id])
   bookingDate DateTime @default(now())
@@ -93,6 +109,7 @@ model Booking {
   payments Payment[]
   outsourced Outsource[]
   @@index([bookingDate])
+  @@unique([customerAccountId, requestKey])
   @@index([pickupAt,returnAt])
 }
 model BookingItem {

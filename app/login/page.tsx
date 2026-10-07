@@ -89,6 +89,9 @@ export default function Login() {
             <ShieldCheck size={15} />
             Private workspace · Authorized staff only
           </div>
+          <p>
+            <a href="/rentals">Customer? Browse equipment and rental dates</a>
+          </p>
         </div>
       </section>
     </main>

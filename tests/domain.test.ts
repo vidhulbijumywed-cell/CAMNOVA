@@ -25,6 +25,12 @@ import {
 } from "../lib/domain";
 import { documentPdf, exportSheet } from "../lib/documents";
 import { decodeProductPhoto, MAX_PHOTO_BYTES } from "../lib/product-photo";
+import {
+  customerCatalogue,
+  registerCustomer,
+  submitCustomerRequest,
+  customerRequests,
+} from "../lib/customer-portal";
 if (!new URL(process.env.DATABASE_URL!).pathname.endsWith("_test"))
   throw new Error("Tests require an isolated _test database");
 const owner: Actor = {
@@ -89,6 +95,145 @@ beforeEach(async () => {
   await db.setting.create({ data: { value: defaultSettings } });
 });
 after(() => db.$disconnect());
+test("customer catalogue uses real capacity and excludes internal business records", async () => {
+  let catalogue = await customerCatalogue(pickup, returnAt);
+  const product = catalogue.items.find((e) => e.id === equipmentId)!;
+  assert.equal(product.available, 1);
+  assert.equal(catalogue.days, 1);
+  assert.equal("purchaseCost" in product, false);
+  assert.equal("assets" in product, false);
+  assert.equal("notes" in product, false);
+  await saveBooking(owner, body());
+  catalogue = await customerCatalogue(pickup, returnAt);
+  assert.equal(catalogue.items.find((e) => e.id === equipmentId)!.available, 0);
+  assert.equal((await customerCatalogue()).items[0].available, null);
+  await assert.rejects(
+    customerCatalogue(returnAt, pickup),
+    /future pickup and return/,
+  );
+});
+test("customer signup cannot claim historical customers; requests are private, idempotent drafts", async () => {
+  const email = "customer@example.test";
+  await db.customer.update({ where: { id: customerId }, data: { email } });
+  const account = await registerCustomer(
+    {
+      name: "New Customer",
+      email,
+      phone: "9000000000",
+      password: "FictionalCustomerPassword42!",
+    },
+    "unit-test",
+  );
+  const saved = await db.customerAccount.findUniqueOrThrow({
+    where: { id: account.id },
+  });
+  assert.notEqual(saved.customerId, customerId);
+  const request = {
+    from: pickup,
+    to: returnAt,
+    requestKey: "7d1f0afe-53bb-4f7d-bb8c-34e348758dd0",
+    items: [{ equipmentId, quantity: 1 }],
+    notes: "Wedding shoot",
+  };
+  const first = await submitCustomerRequest(account.id, request);
+  assert.deepEqual(await submitCustomerRequest(account.id, request), first);
+  const booking = await db.booking.findUniqueOrThrow({
+    where: { id: first.id },
+    include: { items: true },
+  });
+  assert.equal(booking.status, "DRAFT");
+  assert.equal(booking.total, 100000);
+  assert.equal(booking.customerId, saved.customerId);
+  assert.equal(
+    (await customerCatalogue(pickup, returnAt)).items.find(
+      (e) => e.id === equipmentId,
+    )!.available,
+    1,
+  );
+  assert.equal((await customerRequests(account.id)).length, 1);
+  assert.equal((await customerRequests("another-account")).length, 0);
+  assert.equal("notes" in (await customerRequests(account.id))[0], false);
+  await saveBooking(
+    owner,
+    {
+      ...body(),
+      customerId: saved.customerId,
+      status: "DRAFT",
+      version: booking.version,
+    },
+    booking.id,
+  );
+  assert.equal((await customerRequests(account.id)).length, 1);
+  const updated = await db.booking.findUniqueOrThrow({
+    where: { id: booking.id },
+  });
+  await saveBooking(
+    owner,
+    { ...body(), status: "DRAFT", version: updated.version },
+    booking.id,
+  );
+  assert.equal((await customerRequests(account.id)).length, 0);
+  await saveBooking(owner, body());
+  await assert.rejects(
+    submitCustomerRequest(account.id, {
+      ...request,
+      requestKey: "971811a9-8843-4c0d-914e-d01d817d90d5",
+    }),
+    /Insufficient equipment/,
+  );
+});
+test("customer requests keep unpriced totals unknown and reject invalid input", async () => {
+  const account = await registerCustomer(
+    {
+      name: "Quote Customer",
+      email: "quote@example.test",
+      phone: "9000000000",
+      password: "FictionalCustomerPassword42!",
+    },
+    "quote-test",
+  );
+  await db.equipment.update({
+    where: { id: equipmentId },
+    data: { rate: null },
+  });
+  const request = {
+    from: pickup,
+    to: returnAt,
+    requestKey: "7d1f0afe-53bb-4f7d-bb8c-34e348758dd0",
+    items: [{ equipmentId, quantity: 1 }],
+  };
+  const booking = await submitCustomerRequest(account.id, request);
+  assert.equal(
+    (await db.booking.findUniqueOrThrow({ where: { id: booking.id } })).total,
+    null,
+  );
+  await assert.rejects(
+    submitCustomerRequest(account.id, {
+      ...request,
+      items: [request.items[0], request.items[0]],
+    }),
+    /Combine duplicate/,
+  );
+  await db.customerAccount.update({
+    where: { id: account.id },
+    data: { active: false },
+  });
+  await assert.rejects(
+    submitCustomerRequest(account.id, request),
+    /sign in again/,
+  );
+  await assert.rejects(
+    registerCustomer(
+      {
+        name: "Bad",
+        email: "bad@example.test",
+        phone: "9000000000",
+        password: "short",
+      },
+      "bad-test",
+    ),
+  );
+});
 test("product photos persist, stay out of snapshots, preserve on edit, replace and remove", async () => {
   const image = readFileSync(
     new URL("./fixtures/product.jpg", import.meta.url),

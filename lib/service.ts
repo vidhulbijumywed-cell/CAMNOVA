@@ -99,10 +99,9 @@ const bookingSchema = z.object({
     .max(100)
     .default([]),
 });
-export async function checkCapacity(
+export async function availableQuantity(
   tx: Tx,
   equipmentId: string,
-  quantity: number,
   start: Date,
   end: Date,
   excludeId?: number,
@@ -124,8 +123,8 @@ export async function checkCapacity(
     include: { booking: true },
   });
   const events: [number, number][] = [
-    [+start, quantity],
-    [+end + buffer, -quantity],
+    [+start, 0],
+    [+end + buffer, 0],
   ];
   const addInterval = (begin: number, finish: number, units: number) => {
     if (units <= 0 || begin >= +end + buffer || finish <= +start) return;
@@ -165,14 +164,28 @@ export async function checkCapacity(
   }
   events.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
   let used = 0;
+  let peak = 0;
   for (const [, delta] of events) {
     used += delta;
-    if (used > capacity)
-      throw new HttpError(
-        409,
-        "Insufficient equipment availability. Check the calendar or reduce quantity.",
-      );
+    peak = Math.max(peak, used);
   }
+  return Math.max(0, capacity - peak);
+}
+export async function checkCapacity(
+  tx: Tx,
+  equipmentId: string,
+  quantity: number,
+  start: Date,
+  end: Date,
+  excludeId?: number,
+) {
+  if (
+    quantity > (await availableQuantity(tx, equipmentId, start, end, excludeId))
+  )
+    throw new HttpError(
+      409,
+      "Insufficient equipment availability. Check the calendar or reduce quantity.",
+    );
 }
 export async function saveBooking(a: Actor, input: unknown, id?: number) {
   const v = bookingSchema.parse(input);
@@ -330,6 +343,10 @@ export async function saveBooking(a: Actor, input: unknown, id?: number) {
           data: {
             ...data,
             historical: remainsHistorical,
+            ...(existing.customerAccountId &&
+            existing.customerId !== data.customerId
+              ? { customerAccountId: null, requestKey: null }
+              : {}),
             version: { increment: 1 },
           },
           include: includeBooking,

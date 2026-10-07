@@ -35,6 +35,16 @@ Set `SEED_DEMO=false`, strong initial passwords, a random `NEXTAUTH_SECRET`, and
 
 ## Working in the app
 
+## Customer portal
+
+Share `/rentals` on the deployed CAMNOVA domain with customers. The storefront uses real inventory, daily rates, model photos and date-based availability, including maintenance, overdue rentals, partial returns and turnaround time. Pickup and return inputs use IST. Customers can search/filter the catalogue, create an email/password account at `/customer/login`, choose quantities and send a rental request. Unpriced items remain “Rate on request”; estimates follow the configured rental-day policy.
+
+Customer requests appear as **Draft** bookings in the existing staff workspace, with a source note. Drafts do not hold stock; staff must review, price and confirm them, and confirmation rechecks capacity. Customers see only their own portal requests and updated booking statuses. Customer credentials cannot access staff APIs, exports, customer lists or workspace settings. New registrations create a separate customer identity and never claim historical records by matching an unverified email. Reassigning a portal booking to a different customer removes its portal access link.
+
+The supplied storefront prototype informs the design and hero images; its hardcoded stock, discounted combos, font and contact details are not used as live business data. Customer photos in the catalogue are public. No new service key or storage account is required. Deploy with `npm ci --include=dev && npm run build` and `bash scripts/deploy-start.sh`; startup applies the additive customer-account migration before serving requests. Email verification, self-service password recovery, online payments and configurable combo pricing are not part of this first version. Customer passwords are hashed; sign-in and registration are throttled.
+
+## Staff workspace
+
 - **Dashboard:** monthly booking revenue, collection balances, weekday chart, upcoming rentals, and recent bookings.
 - **Bookings:** create drafts, choose customer and equipment, confirm dates, enter negotiated pricing, and record payments independently. Booking references remain stable after sorting. Owner can edit confirmed financial records; staff can create bookings and manage operational checklists.
 - **Calendar:** pickup/return dates and active reservation details. Availability uses the full rental interval, quantity, maintenance capacity, turnaround buffer, and overdue equipment still out with customers.
