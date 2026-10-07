@@ -100,7 +100,10 @@ export async function exportSheet(
       "Outsource cost INR",
       "Revenue after outsourcing INR",
     ]);
-    for (const b of await db.booking.findMany({ include: includeBooking })) {
+    for (const b of await db.booking.findMany({
+      where: { status: { not: "DELETED" } },
+      include: includeBooking,
+    })) {
       const l = ledger(b.payments, b.total),
         cost = b.outsourced.reduce((n, o) => n + o.cost, 0);
       s.addRow([
@@ -129,6 +132,7 @@ export async function exportSheet(
       "Notes",
     ]);
     for (const b of await db.booking.findMany({
+      where: { status: { not: "DELETED" } },
       include: includeBooking,
       orderBy: { bookingDate: "asc" },
     })) {
@@ -175,7 +179,8 @@ export async function documentPdf(
     where: { id },
     include: includeBooking,
   });
-  if (!b) throw new HttpError(404, "Booking not found");
+  if (!b || b.status === "DELETED")
+    throw new HttpError(404, "Booking not found");
   const s = await settings(),
     l = ledger(b.payments, b.total);
   const p = paymentId ? b.payments.find((p) => p.id === paymentId) : undefined;

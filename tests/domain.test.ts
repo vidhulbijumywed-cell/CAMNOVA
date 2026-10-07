@@ -777,3 +777,71 @@ test("turnaround buffer applies after actual check-in", async () => {
     returnAt: tomorrow,
   });
 });
+
+test("staff confirms without payment; only owners can remove payments and bookings with audit history", async () => {
+  const b = await saveBooking(staff, { ...body(), status: "DRAFT" });
+  await bookingAction(staff, b.id, { action: "CONFIRM", version: b.version });
+  let record = await db.booking.findUniqueOrThrow({
+    where: { id: b.id },
+    include: includeBooking,
+  });
+  assert.equal(record.status, "BOOKED");
+  assert.equal(record.payments.length, 0);
+  const p = await addPayment(staff, b.id, {
+    amount: 10000,
+    kind: "RENTAL",
+    mode: "Cash",
+    paidAt: pickup,
+  });
+  record = await db.booking.findUniqueOrThrow({
+    where: { id: b.id },
+    include: includeBooking,
+  });
+  const removal = {
+    action: "DELETE_PAYMENT",
+    version: record.version,
+    paymentId: p.id,
+    notes: "Duplicate entry",
+  };
+  await assert.rejects(bookingAction(staff, b.id, removal));
+  await assert.rejects(
+    bookingAction(owner, b.id, {
+      action: "DELETE",
+      version: record.version,
+      notes: "Mistaken booking",
+    }),
+  );
+  await bookingAction(owner, b.id, removal);
+  await assert.rejects(bookingAction(owner, b.id, removal));
+  record = await db.booking.findUniqueOrThrow({
+    where: { id: b.id },
+    include: includeBooking,
+  });
+  assert.equal(ledger(record.payments, record.total).paid, 0);
+  assert.equal(record.payments.length, 2);
+  await assert.rejects(
+    bookingAction(staff, b.id, {
+      action: "DELETE",
+      version: record.version,
+      notes: "Mistaken booking",
+    }),
+  );
+  await bookingAction(owner, b.id, {
+    action: "DELETE",
+    version: record.version,
+    notes: "Mistaken booking",
+  });
+  assert.equal(
+    (await snapshot(owner, "2026-11")).bookings.some((x) => x.id === b.id),
+    false,
+  );
+  await assert.rejects(
+    saveBooking(owner, { ...body(), version: record.version + 1 }, b.id),
+  );
+  assert.equal(
+    await db.audit.count({
+      where: { entityId: String(b.id), action: "DELETE" },
+    }),
+    1,
+  );
+});

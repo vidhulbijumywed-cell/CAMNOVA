@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { signOut } from "next-auth/react";
 import { Camera, ArrowRight, Package, Minus, Plus } from "lucide-react";
 import { money, bookingNumber } from "@/lib/domain";
@@ -38,6 +38,13 @@ export default function CustomerStorefront({
 }: {
   initial: Catalogue;
 }) {
+  const drawer = useRef<HTMLDialogElement>(null);
+  const statuses = useRef<Record<number, string>>({});
+  const [cartOpen, setCartOpen] = useState(false);
+  useEffect(() => {
+    if (cartOpen) drawer.current?.showModal();
+    else drawer.current?.close();
+  }, [cartOpen]);
   const [catalogue, setCatalogue] = useState(initial);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
@@ -61,8 +68,22 @@ export default function CustomerStorefront({
   );
   async function refreshAccount() {
     const response = await fetch("/api/customer/me");
-    if (response.ok) setAccount(await response.json());
-    else if (response.status === 401) setAccount(null);
+    if (response.ok) {
+      const next: Account = await response.json();
+      for (const request of next.requests) {
+        if (
+          statuses.current[request.id] &&
+          statuses.current[request.id] !== request.status
+        )
+          setNotice(
+            `Booking ${bookingNumber(request.id)} updated: ${request.status === "BOOKED" ? "Confirmed by our team" : request.status.replaceAll("_", " ")}.`,
+          );
+      }
+      statuses.current = Object.fromEntries(
+        next.requests.map((r) => [r.id, r.status]),
+      );
+      setAccount(next);
+    } else if (response.status === 401) setAccount(null);
   }
   useEffect(() => {
     setRequestKey(crypto.randomUUID());
@@ -88,6 +109,18 @@ export default function CustomerStorefront({
       setError("Unable to load your account. Refresh to try again."),
     );
   }, []);
+  useEffect(() => {
+    const refresh = () => {
+      if (document.visibilityState === "visible")
+        refreshAccount().catch(() => {});
+    };
+    const timer = window.setInterval(refresh, 30000);
+    window.addEventListener("focus", refresh);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("focus", refresh);
+    };
+  }, []);
   async function checkDates() {
     setBusy(true);
     setError("");
@@ -110,7 +143,12 @@ export default function CustomerStorefront({
   function changeQuantity(id: string, quantity: number) {
     setCart({ ...cart, [id]: Math.max(0, quantity) });
     setRequestKey(crypto.randomUUID());
-    setNotice("");
+    const name = catalogue.items.find((e) => e.id === id)?.name ?? "Product";
+    setNotice(
+      quantity > (cart[id] ?? 0)
+        ? `${name} added to your cart.`
+        : `${name} quantity updated.`,
+    );
   }
   return (
     <div className="portal">
@@ -118,6 +156,9 @@ export default function CustomerStorefront({
         <a href="/rentals">
           <img src="/storefront/wordmark-white.png" alt="CAMNOVA Rentals" />
         </a>
+        <button className="portal-outline" onClick={() => setCartOpen(true)}>
+          Cart ({Object.values(cart).reduce((n, q) => n + q, 0)})
+        </button>
         <nav>
           <a href="#catalogue">Catalogue</a>
           {account && <a href="#my-requests">My requests</a>}
@@ -210,11 +251,6 @@ export default function CustomerStorefront({
         {error && (
           <p className="portal-error" role="alert">
             {error}
-          </p>
-        )}
-        {notice && (
-          <p className="portal-success" role="status">
-            {notice}
           </p>
         )}
         <section id="catalogue" className="portal-catalogue">
@@ -330,106 +366,149 @@ export default function CustomerStorefront({
               e.name.toLowerCase().includes(query.toLowerCase()),
           ) && <p>No equipment matches your search.</p>}
         </section>
-        {selected.length > 0 && (
-          <section className="portal-request">
-            <h2>Your rental request</h2>
-            <p>
-              Requests are not reservations. Gear is reserved only after our
-              team confirms your booking.
-            </p>
-            <ul>
-              {selected.map((e) => (
-                <li key={e.id}>
-                  {e.name} × {cart[e.id]}
-                </li>
-              ))}
-            </ul>
-            {current && (
+        <dialog
+          ref={drawer}
+          className="portal-checkout"
+          onCancel={() => setCartOpen(false)}
+          onClose={() => setCartOpen(false)}
+          aria-label="Your rental request"
+        >
+          <button className="portal-outline" onClick={() => setCartOpen(false)}>
+            Close · keep browsing
+          </button>
+          {error && <p role="alert">{error}</p>}
+          {notice && <p role="status">{notice}</p>}
+          {!selected.length && (
+            <p>Your cart is empty. Browse the catalogue to choose equipment.</p>
+          )}
+          {selected.length > 0 && (
+            <section className="portal-request">
+              <h2>Your rental request</h2>
               <p>
-                <strong>Estimated rental: {money(total)}</strong>
-                {selected.some((e) => e.rate === null) &&
-                  " plus items requiring a quote"}
-                . Final pricing is confirmed by our team.
+                Requests are not reservations. Gear is reserved only after our
+                team confirms your booking.
               </p>
-            )}
-            {account ? (
-              <form
-                onSubmit={async (event) => {
-                  event.preventDefault();
-                  if (!current || busy) return;
-                  setBusy(true);
-                  setError("");
-                  try {
-                    const response = await fetch("/api/customer/requests", {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        from: instant(from),
-                        to: instant(to),
-                        requestKey,
-                        notes,
-                        items: selected.map((e) => ({
-                          equipmentId: e.id,
-                          quantity: cart[e.id],
-                        })),
-                      }),
-                    });
-                    const result = await response.json();
-                    if (!response.ok) throw new Error(result.error);
-                    setNotice(
-                      `Request ${bookingNumber(result.id)} sent. Our team will confirm availability and pricing.`,
-                    );
-                    setCart({});
-                    setNotes("");
-                    setRequestKey(crypto.randomUUID());
-                    sessionStorage.removeItem("camnova-customer-cart");
-                    await refreshAccount();
-                  } catch (e) {
-                    setError(
-                      e instanceof Error ? e.message : "Unable to send request",
-                    );
-                  } finally {
-                    setBusy(false);
-                  }
-                }}
-              >
-                <label>
-                  What are you shooting? (optional)
-                  <textarea
-                    maxLength={1000}
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                  />
-                </label>
-                <button
+              <ul>
+                {selected.map((e) => (
+                  <li key={e.id}>
+                    {e.name} × {cart[e.id]}
+                  </li>
+                ))}
+              </ul>
+              {current && (
+                <p>
+                  <strong>Estimated rental: {money(total)}</strong>
+                  {selected.some((e) => e.rate === null) &&
+                    " plus items requiring a quote"}
+                  . Final pricing is confirmed by our team.
+                </p>
+              )}
+              {account ? (
+                <form
+                  onSubmit={async (event) => {
+                    event.preventDefault();
+                    if (!current || busy) return;
+                    setBusy(true);
+                    setError("");
+                    try {
+                      const response = await fetch("/api/customer/requests", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          from: instant(from),
+                          to: instant(to),
+                          requestKey,
+                          notes,
+                          items: selected.map((e) => ({
+                            equipmentId: e.id,
+                            quantity: cart[e.id],
+                          })),
+                        }),
+                      });
+                      const result = await response.json();
+                      if (!response.ok) throw new Error(result.error);
+                      setNotice(
+                        `Request ${bookingNumber(result.id)} sent. Our team will confirm availability and pricing.`,
+                      );
+                      setCart({});
+                      setNotes("");
+                      setRequestKey(crypto.randomUUID());
+                      sessionStorage.removeItem("camnova-customer-cart");
+                      await refreshAccount();
+                    } catch (e) {
+                      setError(
+                        e instanceof Error
+                          ? e.message
+                          : "Unable to send request",
+                      );
+                    } finally {
+                      setBusy(false);
+                    }
+                  }}
+                >
+                  <label>
+                    What are you shooting? (optional)
+                    <textarea
+                      maxLength={1000}
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                    />
+                  </label>
+                  <button
+                    className="portal-button"
+                    disabled={
+                      !current ||
+                      busy ||
+                      selected.some((e) => cart[e.id] > (e.available ?? 0))
+                    }
+                  >
+                    {busy ? "Sending…" : "Send rental request"}
+                  </button>
+                </form>
+              ) : (
+                <a
                   className="portal-button"
-                  disabled={
-                    !current ||
-                    busy ||
-                    selected.some((e) => cart[e.id] > (e.available ?? 0))
+                  href="/customer/login"
+                  onClick={() =>
+                    sessionStorage.setItem(
+                      "camnova-customer-cart",
+                      JSON.stringify({ from, to, cart }),
+                    )
                   }
                 >
-                  {busy ? "Sending…" : "Send rental request"}
+                  Sign in to send your request
+                </a>
+              )}
+              {!current && (
+                <button
+                  className="portal-button"
+                  disabled={busy}
+                  onClick={checkDates}
+                >
+                  Check availability for your dates
                 </button>
-              </form>
-            ) : (
-              <a
-                className="portal-button"
-                href="/customer/login"
-                onClick={() =>
-                  sessionStorage.setItem(
-                    "camnova-customer-cart",
-                    JSON.stringify({ from, to, cart }),
-                  )
-                }
-              >
-                Sign in to send your request
-              </a>
-            )}
-            {!current && (
-              <p>Check availability for your current dates to continue.</p>
-            )}
-          </section>
+              )}
+            </section>
+          )}
+        </dialog>
+        {selected.length > 0 && (
+          <div className="portal-cart-bar">
+            <strong>
+              {Object.values(cart).reduce((n, q) => n + q, 0)} items ·{" "}
+              {money(total)} estimated
+            </strong>
+            <button className="portal-button" onClick={() => setCartOpen(true)}>
+              Review cart & request <ArrowRight size={18} />
+            </button>
+          </div>
+        )}
+        {notice && !cartOpen && (
+          <div className="portal-toast" role="status">
+            {notice}
+            <button aria-label="Dismiss update" onClick={() => setNotice("")}>
+              ×
+            </button>
+          </div>
         )}
         {account && (
           <section id="my-requests" className="portal-my-requests">
@@ -445,7 +524,9 @@ export default function CustomerStorefront({
                     <span className="portal-status">
                       {request.status === "DRAFT"
                         ? "Awaiting confirmation"
-                        : request.status.replaceAll("_", " ")}
+                        : request.status === "DELETED"
+                          ? "Removed by team"
+                          : request.status.replaceAll("_", " ")}
                     </span>
                   </div>
                   <p>

@@ -1844,6 +1844,33 @@ export default function Workspace({ initial }: { initial: Data }) {
               {!b.payments.length && (
                 <p className="muted">No payments recorded yet.</p>
               )}
+              {owner &&
+                b.payments
+                  .filter(
+                    (p) =>
+                      !p.reversesId &&
+                      !b.payments.some((x) => x.reversesId === p.id),
+                  )
+                  .map((p) => (
+                    <button
+                      key={p.id}
+                      className="button danger"
+                      onClick={() => {
+                        const notes = window.prompt(
+                          `Delete payment ${money(p.amount)}? Enter a correction reason. This preserves the audit history.`,
+                        );
+                        if (notes?.trim())
+                          submit(`/api/bookings/${b.id}/action`, {
+                            action: "DELETE_PAYMENT",
+                            paymentId: p.id,
+                            version: b.version,
+                            notes,
+                          });
+                      }}
+                    >
+                      Delete payment {money(p.amount)}
+                    </button>
+                  ))}
               <h3 className="section-title">Outsourced equipment</h3>
               {b.outsourced.map((o) => (
                 <div className="detail-row" key={o.id}>
@@ -1872,6 +1899,42 @@ export default function Workspace({ initial }: { initial: Data }) {
                 {JSON.stringify(b.checklist, null, 2)}
               </pre>
               <div className="detail-actions">
+                {b.status === "DRAFT" && (
+                  <button
+                    className="primary"
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          "Confirm this booking and reserve the gear? No payment is required.",
+                        )
+                      )
+                        submit(`/api/bookings/${b.id}/action`, {
+                          action: "CONFIRM",
+                          version: b.version,
+                        });
+                    }}
+                  >
+                    Confirm booking (payment optional)
+                  </button>
+                )}
+                {owner && (
+                  <button
+                    className="button danger"
+                    onClick={() => {
+                      const notes = window.prompt(
+                        "Delete this booking from active records? Enter a correction reason. Audit history is preserved.",
+                      );
+                      if (notes?.trim())
+                        submit(`/api/bookings/${b.id}/action`, {
+                          action: "DELETE",
+                          version: b.version,
+                          notes,
+                        });
+                    }}
+                  >
+                    Delete booking
+                  </button>
+                )}
                 {(owner || b.status === "DRAFT") && (
                   <button className="button" onClick={() => open("booking", b)}>
                     Edit booking

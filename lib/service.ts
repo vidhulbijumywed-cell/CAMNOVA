@@ -193,7 +193,8 @@ export async function saveBooking(a: Actor, input: unknown, id?: number) {
     const existing = id
       ? await tx.booking.findUnique({ where: { id }, include: includeBooking })
       : null;
-    if (id && !existing) throw new HttpError(404, "Booking not found");
+    if (id && (!existing || existing.status === "DELETED"))
+      throw new HttpError(404, "Booking not found");
     if (existing && v.version !== existing.version)
       throw new HttpError(409, "This booking changed. Reload before saving.");
     if (
@@ -377,7 +378,8 @@ export async function addPayment(a: Actor, id: number, input: unknown) {
       where: { id },
       include: includeBooking,
     });
-    if (!b) throw new HttpError(404, "Booking not found");
+    if (!b || b.status === "DELETED")
+      throw new HttpError(404, "Booking not found");
     if (v.refund || v.reviewedCredit || v.correctId) admin(a);
     if (v.reviewedCredit && !v.notes.trim())
       throw new HttpError(400, "Explain the reviewed credit");
@@ -453,7 +455,18 @@ export async function addPayment(a: Actor, id: number, input: unknown) {
 export async function bookingAction(a: Actor, id: number, input: unknown) {
   const v = z
     .object({
-      action: z.enum(["PICKUP", "RETURN", "CANCEL", "FOLLOWUP", "EXTEND"]),
+      version: z.number().int().optional(),
+      paymentId: z.string().optional(),
+      action: z.enum([
+        "PICKUP",
+        "RETURN",
+        "CANCEL",
+        "FOLLOWUP",
+        "EXTEND",
+        "CONFIRM",
+        "DELETE",
+        "DELETE_PAYMENT",
+      ]),
       notes: z.string().max(5000).default(""),
       accessories: z.string().max(2000).default(""),
       condition: z.string().max(2000).default(""),
@@ -470,9 +483,87 @@ export async function bookingAction(a: Actor, id: number, input: unknown) {
       where: { id },
       include: includeBooking,
     });
-    if (!b) throw new HttpError(404, "Booking not found");
+    if (!b || b.status === "DELETED")
+      throw new HttpError(404, "Booking not found");
+    if (["CONFIRM", "DELETE", "DELETE_PAYMENT"].includes(v.action)) {
+      if (v.version !== b.version)
+        throw new HttpError(409, "Booking changed. Refresh before continuing.");
+    }
+    if (v.action === "CONFIRM") {
+      if (b.status !== "DRAFT" || b.historical)
+        throw new HttpError(409, "Only active drafts can be confirmed");
+      if (
+        !b.customerId ||
+        !b.pickupAt ||
+        !b.returnAt ||
+        !b.items.length ||
+        b.total === null
+      )
+        throw new HttpError(
+          400,
+          "Edit the booking to complete customer, dates and pricing first",
+        );
+      for (const item of b.items)
+        await checkCapacity(
+          tx,
+          item.equipmentId,
+          item.quantity,
+          b.pickupAt,
+          b.returnAt,
+          b.id,
+        );
+    }
+    if (v.action === "DELETE" || v.action === "DELETE_PAYMENT") {
+      admin(a);
+      if (!v.notes.trim())
+        throw new HttpError(400, "A correction reason is required");
+    }
+    if (v.action === "DELETE_PAYMENT") {
+      const p = b.payments.find((p) => p.id === v.paymentId);
+      if (!p || p.reversesId || b.payments.some((x) => x.reversesId === p.id))
+        throw new HttpError(409, "Payment already removed or corrected");
+      const remaining = ledger(
+        b.payments.filter((x) => x.id !== p.id),
+        b.total,
+      );
+      if (remaining.paid < 0 || remaining.deposit < 0)
+        throw new HttpError(409, "Correct linked refunds first");
+      await tx.payment.create({
+        data: {
+          bookingId: id,
+          amount: -p.amount,
+          kind: p.kind,
+          mode: p.mode,
+          paidAt: p.paidAt,
+          reference: p.reference,
+          notes: `Removed entry: ${v.notes}`,
+          recordedBy: a.id,
+          reversesId: p.id,
+        },
+      });
+    }
+    if (v.action === "DELETE") {
+      if (
+        b.status === "PICKED_UP" ||
+        b.items.some((i) => i.returned < i.quantity && b.actualPickupAt)
+      )
+        throw new HttpError(409, "Return issued equipment first");
+      if (
+        b.payments.some(
+          (p) =>
+            !p.reversesId && !b.payments.some((x) => x.reversesId === p.id),
+        ) ||
+        b.outsourced.some((o) => o.payments.length)
+      )
+        throw new HttpError(
+          409,
+          "Correct or remove payment entries before deleting this booking",
+        );
+    }
     const checklist = b.checklist as { events?: object[] };
     const changes: Prisma.BookingUpdateInput = { version: { increment: 1 } };
+    if (v.action === "CONFIRM") changes.status = "BOOKED";
+    if (v.action === "DELETE") changes.status = "DELETED";
     if (v.action === "FOLLOWUP") {
       changes.followupNote = v.notes;
       changes.followupAt = v.followupAt;
@@ -829,6 +920,7 @@ export async function snapshot(a: Actor, month: string) {
   const [bookings, inventory, customers, vendors, s, imports, users, audits] =
     await Promise.all([
       db.booking.findMany({
+        where: { status: { not: "DELETED" } },
         include: includeBooking,
         orderBy: { bookingDate: "desc" },
       }),

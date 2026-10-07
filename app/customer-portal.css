@@ -470,3 +470,81 @@
     font-size: 30px;
   }
 }
+
+.portal-checkout {
+  position: fixed;
+  inset: 0 0 0 auto;
+  margin: 0;
+  width: min(460px, 100vw);
+  height: 100dvh;
+  max-height: 100dvh;
+  max-width: 100vw;
+  box-sizing: border-box;
+  border: 0;
+  padding: 26px;
+  background: white;
+  color: #171717;
+  overflow: auto;
+}
+.portal-checkout::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+.portal-checkout .portal-request {
+  margin-top: 24px;
+  padding-top: 0;
+  border: 0;
+}
+.portal-checkout .portal-outline {
+  color: #171717;
+  border-color: #aaa;
+}
+.portal-cart-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  background: #fff;
+  box-shadow: 0 -4px 20px #0002;
+  padding: 12px 24px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+.portal-toast {
+  position: fixed;
+  bottom: 100px;
+  right: 20px;
+  left: auto;
+  max-width: min(420px, 85vw);
+  z-index: 30;
+  background: #171717;
+  color: white;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px #0003;
+}
+.portal-toast button {
+  margin-left: 12px;
+  background: transparent;
+  border: 0;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+}
+.portal {
+  padding-bottom: 90px;
+}
+@media (max-width: 600px) {
+  .portal-cart-bar {
+    padding: 10px;
+    font-size: 12px;
+  }
+  .portal-cart-bar .portal-button {
+    padding: 12px;
+  }
+  .portal-header {
+    flex-wrap: wrap;
+  }
+}

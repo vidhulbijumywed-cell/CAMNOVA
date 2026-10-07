@@ -34,6 +34,8 @@ test("customers check live dates, register, send a private draft and cannot acce
   await page
     .getByRole("button", { name: "Add SONY A7M4", exact: true })
     .click();
+  await expect(page.getByRole("status")).toContainText("added to your cart");
+  await page.getByRole("button", { name: "Review cart & request" }).click();
   await page
     .getByRole("link", { name: "Sign in to send your request" })
     .click();
@@ -52,6 +54,7 @@ test("customers check live dates, register, send a private draft and cannot acce
     .click();
   await expect(page).toHaveURL(/\/rentals$/);
   await page.getByRole("button", { name: "Check availability" }).click();
+  await page.getByRole("button", { name: "Review cart & request" }).click();
   await expect(
     page.getByRole("button", { name: "Send rental request", exact: true }),
   ).toBeEnabled();
@@ -62,6 +65,7 @@ test("customers check live dates, register, send a private draft and cannot acce
     .getByRole("button", { name: "Send rental request", exact: true })
     .click();
   await expect(page.getByRole("status")).toContainText("sent");
+  await page.getByRole("button", { name: "Close · keep browsing" }).click();
   await expect(page.locator(".portal-my-requests")).toContainText(
     "Awaiting confirmation",
   );
@@ -116,7 +120,8 @@ test("customers check live dates, register, send a private draft and cannot acce
   } finally {
     await ownerContext.close();
   }
-  await page.reload();
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await expect(page.getByRole("status")).toContainText("Confirmed by our team");
   await expect(page.locator(".portal-my-requests")).toContainText("BOOKED");
   expect((await page.request.get("/api/snapshot?month=2026-10")).status()).toBe(
     403,
