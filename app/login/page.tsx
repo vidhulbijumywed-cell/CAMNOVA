@@ -44,7 +44,7 @@ export default function Login() {
                   password: f.get("password"),
                   redirect: false,
                 });
-                if (r?.ok) window.location.href = "/";
+                if (r?.ok) window.location.href = "/workspace";
                 else
                   setError(
                     "Unable to sign in. Check your details or try again in 15 minutes.",

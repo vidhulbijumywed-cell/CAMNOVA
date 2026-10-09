@@ -1,0 +1,597 @@
+.cn-home {
+  background: #000;
+  color: #fff;
+  font-size: 16px;
+  line-height: 1.65;
+  overflow: clip;
+  --cn-red: #ed1a3a;
+}
+.cn-home a:focus-visible,
+.cn-home summary:focus-visible {
+  outline: 3px solid #ed1a3a;
+  outline-offset: 6px;
+}
+.cn-skip {
+  position: absolute;
+  left: 20px;
+  top: -80px;
+  z-index: 100;
+  background: #fff;
+  color: #000;
+  padding: 12px;
+}
+.cn-skip:focus {
+  top: 12px;
+}
+.cn-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 25px 5%;
+  border-bottom: 1px solid #ffffff26;
+  gap: 25px;
+}
+.cn-nav img,
+.cn-footer img {
+  object-fit: contain;
+  width: 180px;
+  height: auto;
+}
+.cn-nav nav {
+  display: flex;
+  gap: 32px;
+  font-size: 13px;
+}
+.cn-nav nav a:hover,
+.cn-text-link:hover {
+  color: var(--cn-red);
+}
+.cn-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 35px;
+  padding: 15px 23px;
+  background: var(--cn-red);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  border: 1px solid transparent;
+  transition: transform 0.2s;
+}
+.cn-button:hover {
+  transform: translateY(-3px);
+}
+.cn-hero {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  min-height: 710px;
+  padding: 80px 5% 60px;
+  gap: 20px;
+  align-items: center;
+}
+.cn-kicker {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.cn-kicker span {
+  width: 7px;
+  height: 7px;
+  background: var(--cn-red);
+  border-radius: 50%;
+}
+.cn-home h1 {
+  font-size: clamp(50px, 6.2vw, 96px);
+  line-height: 0.98;
+  font-weight: 700;
+  letter-spacing: -5px;
+  margin: 28px 0;
+}
+.cn-home em {
+  font-style: normal;
+  color: var(--cn-red);
+}
+.cn-intro {
+  max-width: 440px;
+  font-size: 16px;
+  color: #e2e2e2;
+}
+.cn-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  margin-top: 33px;
+}
+.cn-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.cn-hero-foot {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: #e2e2e2;
+  margin-top: 55px;
+}
+.cn-hero-visual {
+  position: relative;
+  min-height: 530px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cn-disc {
+  position: absolute;
+  width: 90%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--cn-red);
+}
+.cn-main-camera {
+  position: relative;
+  width: 115%;
+  max-width: 660px;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 25px 20px #0008);
+  transform: rotate(-12deg);
+  z-index: 1;
+}
+.cn-visual-label {
+  position: absolute;
+  top: 0;
+  left: 20px;
+  font-size: 10px;
+  letter-spacing: 2px;
+}
+.cn-visual-caption {
+  position: absolute;
+  bottom: 35px;
+  left: 8%;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 11px;
+  line-height: 1.4;
+  z-index: 2;
+}
+.cn-coordinate {
+  position: absolute;
+  bottom: 0;
+  right: 10px;
+  font-size: 9px;
+  letter-spacing: 2px;
+}
+.cn-frame {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-color: #fff;
+  z-index: 2;
+}
+.cn-frame-top {
+  top: 38px;
+  right: 0;
+  border-top: 1px solid;
+  border-right: 1px solid;
+}
+.cn-frame-bottom {
+  bottom: 25px;
+  left: 0;
+  border-bottom: 1px solid;
+  border-left: 1px solid;
+}
+.cn-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 20px;
+  background: var(--cn-red);
+  padding: 23px 5%;
+  font-size: clamp(14px, 2.2vw, 30px);
+  font-weight: 700;
+  letter-spacing: -1px;
+  white-space: nowrap;
+}
+.cn-strip svg {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+}
+.cn-section {
+  padding: 100px 7%;
+  scroll-margin-top: 25px;
+}
+.cn-home h2 {
+  font-size: clamp(36px, 4.2vw, 65px);
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -2.8px;
+  margin-top: 23px;
+}
+.cn-idea {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 70px;
+}
+.cn-idea-copy {
+  padding-top: 35px;
+}
+.cn-idea-copy p {
+  margin-bottom: 22px;
+  color: #e2e2e2;
+  max-width: 550px;
+}
+.cn-idea-copy .cn-lead {
+  font-size: 25px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #fff;
+}
+.cn-idea-copy .cn-text-link {
+  margin-top: 12px;
+}
+.cn-gear {
+  background: #fff;
+  color: #000;
+}
+.cn-section-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 25px;
+  align-items: flex-end;
+  margin-bottom: 45px;
+}
+.cn-gear-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.cn-gear-card {
+  border: 1px solid #e2e2e2;
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  transition:
+    border-color 0.2s,
+    transform 0.2s;
+}
+.cn-gear-card:hover {
+  border-color: var(--cn-red);
+  transform: translateY(-5px);
+}
+.cn-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+.cn-card-top svg {
+  color: var(--cn-red);
+}
+.cn-gear-card img {
+  width: 100%;
+  height: 290px;
+  object-fit: contain;
+  padding: 20px 0;
+}
+.cn-home h3 {
+  font-size: 24px;
+  letter-spacing: -0.8px;
+}
+.cn-gear-card p {
+  font-size: 13px;
+  margin-top: 7px;
+}
+.cn-gear-note {
+  margin-top: 25px;
+  font-size: 12px;
+}
+.cn-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 45px;
+}
+.cn-step-icon {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #ffffff40;
+  padding: 25px 0 35px;
+}
+.cn-step-icon svg {
+  color: var(--cn-red);
+}
+.cn-step-icon span {
+  font-size: 12px;
+}
+.cn-steps p {
+  color: #e2e2e2;
+  font-size: 14px;
+  max-width: 340px;
+  margin-top: 14px;
+}
+.cn-how-note {
+  font-size: 12px;
+  margin-top: 35px;
+  color: #e2e2e2;
+}
+.cn-social {
+  border-top: 1px solid #ffffff30;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+.cn-social p:not(.cn-kicker) {
+  max-width: 400px;
+  color: #e2e2e2;
+  margin: 25px 0;
+}
+.cn-social-mark {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 340px;
+}
+.cn-social-mark svg {
+  width: 330px;
+  height: 330px;
+  color: var(--cn-red);
+  transform: rotate(-15deg);
+}
+.cn-social-mark span {
+  position: absolute;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -1.5px;
+  text-align: center;
+  background: #000;
+  padding: 15px;
+}
+.cn-final {
+  background: var(--cn-red);
+  text-align: center;
+  padding: 85px 20px 90px;
+}
+.cn-final .cn-kicker {
+  justify-content: center;
+}
+.cn-final h2 {
+  font-size: clamp(52px, 7vw, 100px);
+  letter-spacing: -4px;
+  margin-bottom: 35px;
+}
+.cn-final em {
+  color: #000;
+}
+.cn-button-white {
+  background: #fff;
+  color: #000;
+  min-width: 190px;
+}
+.cn-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 25px;
+  padding: 38px 5%;
+  font-size: 12px;
+}
+.cn-footer img {
+  width: 145px;
+}
+.cn-footer nav {
+  display: flex;
+  gap: 25px;
+}
+.cn-footer nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+@media (min-width: 1600px) {
+  .cn-hero,
+  .cn-section {
+    padding-left: max(7%, calc((100vw - 1400px) / 2));
+    padding-right: max(7%, calc((100vw - 1400px) / 2));
+  }
+}
+@media (max-width: 900px) {
+  .cn-nav nav {
+    gap: 18px;
+  }
+  .cn-hero {
+    min-height: 600px;
+    padding-top: 55px;
+  }
+  .cn-home h1 {
+    letter-spacing: -3px;
+  }
+  .cn-hero-visual {
+    min-height: 390px;
+  }
+  .cn-section {
+    padding: 70px 5%;
+  }
+  .cn-idea {
+    gap: 35px;
+  }
+  .cn-gear-card {
+    padding: 16px;
+  }
+  .cn-gear-card img {
+    height: 220px;
+  }
+  .cn-steps {
+    gap: 25px;
+  }
+  .cn-hero-actions {
+    gap: 16px;
+  }
+  .cn-hero-actions .cn-text-link {
+    font-size: 12px;
+  }
+}
+@media (max-width: 640px) {
+  .cn-nav {
+    padding: 20px 5%;
+    flex-wrap: wrap;
+    gap: 18px;
+  }
+  .cn-nav img {
+    width: 145px;
+  }
+  .cn-nav .cn-button {
+    padding: 11px 15px;
+    gap: 16px;
+  }
+  .cn-nav nav {
+    order: 3;
+    width: 100%;
+    justify-content: space-between;
+    font-size: 12px;
+  }
+  .cn-hero {
+    grid-template-columns: 1fr;
+    padding: 45px 5% 35px;
+    gap: 30px;
+  }
+  .cn-home h1 {
+    font-size: clamp(46px, 11vw, 70px);
+    letter-spacing: -2.8px;
+  }
+  .cn-intro {
+    font-size: 14px;
+  }
+  .cn-kicker {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+  }
+  .cn-hero-foot {
+    margin-top: 30px;
+    font-size: 9px;
+  }
+  .cn-hero-visual {
+    min-height: 350px;
+    max-width: 400px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .cn-main-camera {
+    width: 104%;
+  }
+  .cn-disc {
+    width: 83%;
+  }
+  .cn-visual-label {
+    font-size: 8px;
+  }
+  .cn-coordinate {
+    font-size: 8px;
+  }
+  .cn-visual-caption {
+    bottom: 25px;
+    font-size: 10px;
+  }
+  .cn-strip {
+    gap: 15px;
+    padding: 20px 12px;
+    font-size: 13px;
+    letter-spacing: -0.4px;
+  }
+  .cn-strip svg {
+    width: 16px;
+    height: 16px;
+  }
+  .cn-strip svg:last-child {
+    display: none;
+  }
+  .cn-section {
+    padding: 60px 6%;
+  }
+  .cn-home h2 {
+    font-size: 36px;
+    letter-spacing: -1.8px;
+  }
+  .cn-idea,
+  .cn-social {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  .cn-idea-copy {
+    padding: 0;
+  }
+  .cn-idea-copy .cn-lead {
+    font-size: 22px;
+  }
+  .cn-idea-copy p {
+    font-size: 14px;
+  }
+  .cn-section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 23px;
+    margin-bottom: 30px;
+  }
+  .cn-gear-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .cn-gear-card {
+    padding: 24px;
+  }
+  .cn-gear-card img {
+    height: 270px;
+  }
+  .cn-steps {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  .cn-step-icon {
+    padding-bottom: 20px;
+  }
+  .cn-steps p {
+    max-width: none;
+  }
+  .cn-social-mark {
+    min-height: 290px;
+  }
+  .cn-social-mark svg {
+    width: 280px;
+    height: 280px;
+  }
+  .cn-final {
+    padding: 65px 20px;
+  }
+  .cn-final h2 {
+    font-size: 56px;
+    letter-spacing: -2.5px;
+  }
+  .cn-footer {
+    flex-wrap: wrap;
+    padding: 30px 6%;
+  }
+  .cn-footer p {
+    font-size: 11px;
+  }
+  .cn-footer nav {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cn-home * {
+    transition: none !important;
+    transform: none !important;
+  }
+}

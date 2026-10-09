@@ -122,7 +122,7 @@ test("unauthenticated API is protected and login page renders", async ({
 }) => {
   const r = await request.get("/api/snapshot?month=2026-10");
   expect(r.status()).toBe(401);
-  await page.goto("/");
+  await page.goto("/workspace");
   await expect(
     page.getByRole("heading", { name: "Your next shoot starts here." }),
   ).toBeVisible();
@@ -353,14 +353,12 @@ test("staff confirms a request directly and owner deletes it from the booking li
   await page.reload();
   await page.getByRole("button", { name: "Bookings", exact: true }).click();
   await page.getByRole("button", { name: /Booking requests \(\d+\)/ }).click();
-  const target = page
-    .locator("tr")
-    .filter({
-      has: page.getByRole("button", {
-        name: `View ${bookingNumber(b.id)}`,
-        exact: true,
-      }),
-    });
+  const target = page.locator("tr").filter({
+    has: page.getByRole("button", {
+      name: `View ${bookingNumber(b.id)}`,
+      exact: true,
+    }),
+  });
   await target
     .getByRole("button", { name: "Review & confirm", exact: true })
     .click();
