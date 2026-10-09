@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import "./landing.css";
 export const metadata: Metadata = {
-  title: "CAMNOVA Rentals — Your vision. Our gear.",
+  title: "CAMNOVA Rentals — The Complete Creator Space",
   description:
     "Bring your next shoot to life with CAMNOVA Rentals. Explore cameras, lenses and filmmaking equipment, check your dates and request your rental online.",
   robots: { index: true, follow: true },
@@ -105,9 +105,9 @@ export default function Home() {
             <div className="cn-visual-caption">
               <Aperture size={29} />
               <span>
-                YOUR VISION.
+                The Complete
                 <br />
-                <strong>OUR GEAR.</strong>
+                <strong>Creator Space</strong>
               </span>
             </div>
             <span className="cn-coordinate" aria-hidden="true">
@@ -289,7 +289,7 @@ export default function Home() {
             height="48"
           />
         </a>
-        <p>Your vision. Our gear.</p>
+        <p>The Complete Creator Space</p>
         <nav aria-label="Footer navigation">
           <a href="/rentals">Store</a>
           <a href={instagram} target="_blank" rel="noopener noreferrer">
