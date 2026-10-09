@@ -4,7 +4,7 @@ test("public landing page introduces CAMNOVA and leads visitors into the rental 
 }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
-    "BIG IDEAS.",
+    "THE COMPLETE",
   );
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
     "content",

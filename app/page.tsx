@@ -67,11 +67,11 @@ export default function Home() {
               <span /> FOR THE PEOPLE BEHIND THE FRAME
             </p>
             <h1 id="hero-title">
-              BIG IDEAS.
+              THE COMPLETE
               <br />
-              RIGHT GEAR.
+              CREATOR
               <br />
-              <em>YOUR STORY.</em>
+              <em>SPACE</em>
             </h1>
             <p className="cn-intro">
               From the first spark to the final shot. Rent the equipment you
