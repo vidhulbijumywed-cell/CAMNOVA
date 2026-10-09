@@ -134,6 +134,7 @@ test("customer signup cannot claim historical customers; requests are private, i
     requestKey: "7d1f0afe-53bb-4f7d-bb8c-34e348758dd0",
     items: [{ equipmentId, quantity: 1 }],
     notes: "Wedding shoot",
+    phone: "+91 9000000002",
   };
   const first = await submitCustomerRequest(account.id, request);
   assert.deepEqual(await submitCustomerRequest(account.id, request), first);
@@ -142,6 +143,7 @@ test("customer signup cannot claim historical customers; requests are private, i
     include: { items: true },
   });
   assert.equal(booking.status, "DRAFT");
+  assert.match(booking.notes, /Contact phone: \+91 9000000002/);
   assert.equal(booking.total, 100000);
   assert.equal(booking.customerId, saved.customerId);
   assert.equal(

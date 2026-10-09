@@ -43,8 +43,13 @@ async function handle(
       }
       if (path[0] === "me" && path.length === 1) {
         const a = await customerActor();
+        const account = await db.customerAccount.findUniqueOrThrow({
+          where: { id: a.id },
+          select: { customer: { select: { phones: true } } },
+        });
         return NextResponse.json(
           {
+            phone: account.customer.phones[0] ?? "",
             name: a.name,
             email: a.email,
             requests: await customerRequests(a.id),

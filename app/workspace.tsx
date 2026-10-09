@@ -10,6 +10,7 @@ import {
 } from "react";
 import { signOut } from "next-auth/react";
 import {
+  LoaderCircle,
   Aperture,
   ArrowDownLeft,
   ArrowUpRight,
@@ -253,10 +254,30 @@ export default function Workspace({ initial }: { initial: Data }) {
     setPreview(null);
     setFile(null);
   };
+  const seenRequests = useRef(
+    new Set(
+      data.bookings
+        .filter((b) => b.status === "DRAFT" && b.customerAccountId)
+        .map((b) => b.id),
+    ),
+  );
+  const [newRequests, setNewRequests] = useState<number[]>([]);
   async function reload(m = month) {
     const r = await fetch(`/api/snapshot?month=${m}`);
     const result = await r.json();
     if (!r.ok) throw new Error(result.error);
+    const fresh: Booking[] = result.bookings;
+    const newIds = fresh
+      .filter(
+        (b) =>
+          b.status === "DRAFT" &&
+          b.customerAccountId &&
+          !seenRequests.current.has(b.id),
+      )
+      .map((b) => b.id);
+    if (newIds.length)
+      setNewRequests((previous) => [...new Set([...previous, ...newIds])]);
+    fresh.forEach((b) => seenRequests.current.add(b.id));
     setData(result);
   }
   async function submit(path: string, body: unknown, keep = false) {
@@ -654,6 +675,37 @@ export default function Workspace({ initial }: { initial: Data }) {
               )}
             </div>
           </div>
+          {busy && (
+            <div className="app-loading" role="status">
+              <LoaderCircle className="loading-spin" size={22} /> Saving
+              changes…
+            </div>
+          )}
+          {newRequests.length > 0 && (
+            <div className="request-notification" role="status">
+              <Bell size={20} />
+              <strong>
+                {newRequests.length} new booking request
+                {newRequests.length > 1 ? "s" : ""}
+              </strong>
+              <button
+                className="primary"
+                onClick={() => {
+                  move("Bookings");
+                  setFilter("DRAFT");
+                  setNewRequests([]);
+                }}
+              >
+                View requests
+              </button>
+              <button
+                aria-label="Dismiss booking notification"
+                onClick={() => setNewRequests([])}
+              >
+                <X size={18} />
+              </button>
+            </div>
+          )}
           {notice && (
             <div role="status" className="toast">
               <CheckCircle2 size={17} />
@@ -1834,6 +1886,7 @@ export default function Workspace({ initial }: { initial: Data }) {
                     !b.items.length
                   }
                 >
+                  {busy && <LoaderCircle className="loading-spin" size={16} />}
                   {busy ? "Confirming…" : "Confirm booking"}
                 </button>
                 <button
@@ -2774,6 +2827,7 @@ function FormFooter({ busy }: { busy: boolean }) {
         Changes are recorded in your audit trail
       </span>
       <button className="primary" disabled={busy}>
+        {busy && <LoaderCircle className="loading-spin" size={16} />}
         {busy ? "Saving…" : "Save changes"}
         <Check size={15} />
       </button>

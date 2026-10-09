@@ -125,6 +125,11 @@ export async function submitCustomerRequest(accountId: string, input: unknown) {
       to: z.string(),
       requestKey: z.uuid(),
       notes: z.string().trim().max(1000).default(""),
+      phone: z
+        .string()
+        .trim()
+        .regex(/^\+?[\d ()-]{8,25}$/, "Enter a valid phone number")
+        .optional(),
       items: z
         .array(
           z.object({
@@ -166,6 +171,20 @@ export async function submitCustomerRequest(accountId: string, input: unknown) {
         429,
         "You have reached today's request limit. Contact our team",
       );
+    const customer = await tx.customer.findUniqueOrThrow({
+      where: { id: account.customerId },
+    });
+    const phone = v.phone ?? customer.phones[0];
+    if (!phone || !/^\+?[\d ()-]{8,25}$/.test(phone))
+      throw new HttpError(400, "Add a valid contact phone number");
+    if (v.phone)
+      await tx.customer.update({
+        where: { id: account.customerId },
+        data: {
+          phones: [...new Set([v.phone, ...customer.phones])],
+          rawPhone: v.phone,
+        },
+      });
     const preferences = await settings(tx);
     const days = rentalDays(start, end, preferences.rentalPolicy);
     const lines = [];
@@ -196,7 +215,7 @@ export async function submitCustomerRequest(accountId: string, input: unknown) {
         returnAt: end,
         status: "DRAFT",
         total,
-        notes: `Customer portal request — awaiting team confirmation.\n${v.notes}`,
+        notes: `Customer portal request — awaiting team confirmation.\nContact phone: ${phone}\n${v.notes}`,
         items: { create: lines },
       },
       select: { id: true },

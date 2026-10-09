@@ -1,7 +1,14 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { signOut } from "next-auth/react";
-import { Camera, ArrowRight, Package, Minus, Plus } from "lucide-react";
+import {
+  Camera,
+  ArrowRight,
+  Package,
+  Minus,
+  Plus,
+  LoaderCircle,
+} from "lucide-react";
 import { money, bookingNumber } from "@/lib/domain";
 import type { customerCatalogue } from "@/lib/customer-portal";
 type Catalogue = Awaited<ReturnType<typeof customerCatalogue>>;
@@ -13,7 +20,12 @@ type RequestRow = {
   total: number | null;
   items: { quantity: number; equipment: { name: string } }[];
 };
-type Account = { name: string; email: string; requests: RequestRow[] };
+type Account = {
+  phone: string;
+  name: string;
+  email: string;
+  requests: RequestRow[];
+};
 const labels: Record<string, string> = {
   CAMERA: "Cameras",
   LENS: "Lenses",
@@ -55,6 +67,7 @@ export default function CustomerStorefront({
   const [cart, setCart] = useState<Record<string, number>>({});
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
+  const [phone, setPhone] = useState("");
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -83,6 +96,7 @@ export default function CustomerStorefront({
         next.requests.map((r) => [r.id, r.status]),
       );
       setAccount(next);
+      setPhone((current) => current || next.phone);
     } else if (response.status === 401) setAccount(null);
   }
   useEffect(() => {
@@ -151,7 +165,12 @@ export default function CustomerStorefront({
     );
   }
   return (
-    <div className="portal">
+    <div className="portal" aria-busy={busy}>
+      {busy && (
+        <div className="app-loading" role="status">
+          <LoaderCircle className="loading-spin" size={22} /> Please wait…
+        </div>
+      )}
       <header className="portal-header">
         <a href="/rentals">
           <img src="/storefront/wordmark-white.png" alt="CAMNOVA Rentals" />
@@ -245,6 +264,7 @@ export default function CustomerStorefront({
             />
           </label>
           <button className="portal-button" disabled={busy}>
+            {busy && <LoaderCircle className="loading-spin" size={18} />}
             {busy ? "Checking…" : "Check availability"}
           </button>
         </form>
@@ -419,6 +439,7 @@ export default function CustomerStorefront({
                           to: instant(to),
                           requestKey,
                           notes,
+                          phone,
                           items: selected.map((e) => ({
                             equipmentId: e.id,
                             quantity: cart[e.id],
@@ -428,7 +449,7 @@ export default function CustomerStorefront({
                       const result = await response.json();
                       if (!response.ok) throw new Error(result.error);
                       setNotice(
-                        `Request ${bookingNumber(result.id)} sent. Our team will confirm availability and pricing.`,
+                        `Booking request sent (${bookingNumber(result.id)}). Our representative will contact you soon to complete your booking.`,
                       );
                       setCart({});
                       setNotes("");
@@ -447,6 +468,18 @@ export default function CustomerStorefront({
                   }}
                 >
                   <label>
+                    Phone or WhatsApp
+                    <input
+                      type="tel"
+                      autoComplete="tel"
+                      required
+                      maxLength={25}
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="Number our representative can reach"
+                    />
+                  </label>
+                  <label>
                     What are you shooting? (optional)
                     <textarea
                       maxLength={1000}
@@ -462,6 +495,9 @@ export default function CustomerStorefront({
                       selected.some((e) => cart[e.id] > (e.available ?? 0))
                     }
                   >
+                    {busy && (
+                      <LoaderCircle className="loading-spin" size={18} />
+                    )}
                     {busy ? "Sending…" : "Send rental request"}
                   </button>
                 </form>

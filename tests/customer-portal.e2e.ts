@@ -58,13 +58,15 @@ test("customers check live dates, register, send a private draft and cannot acce
   await expect(
     page.getByRole("button", { name: "Send rental request", exact: true }),
   ).toBeEnabled();
+  await expect(page.getByLabel("Phone or WhatsApp")).toHaveValue("9000000000");
+  await page.getByLabel("Phone or WhatsApp").fill("9000000002");
   await page
     .getByLabel("What are you shooting? (optional)")
     .fill("Fictional acceptance request");
   await page
     .getByRole("button", { name: "Send rental request", exact: true })
     .click();
-  await expect(page.getByRole("status")).toContainText("sent");
+  await expect(page.getByRole("status").filter({hasText:"Booking request sent"})).toContainText("Our representative will contact you soon");
   await page.getByRole("button", { name: "Close · keep browsing" }).click();
   await expect(page.locator(".portal-my-requests")).toContainText(
     "Awaiting confirmation",
@@ -95,6 +97,7 @@ test("customers check live dates, register, send a private draft and cannot acce
     );
     expect(draft.status).toBe("DRAFT");
     expect(draft.notes).toContain("Customer portal request");
+    expect(draft.customer.phones).toContain("9000000002");
     const confirm = await ownerPage.request.post(`/api/bookings/${requestId}`, {
       headers: { Origin: new URL(process.env.NEXTAUTH_URL!).origin },
       data: {
