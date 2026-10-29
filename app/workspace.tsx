@@ -1641,6 +1641,9 @@ export default function Workspace({ initial }: { initial: Data }) {
                     >
                       Edit settings
                     </button>
+                    <a className="button" href="/workspace/content">
+                      Website content & SEO
+                    </a>
                   </div>
                   <div className="report-grid">
                     <div>

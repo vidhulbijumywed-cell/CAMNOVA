@@ -885,3 +885,116 @@ test("staff can quote an unpriced request and owner can remove a mistaken paid b
   assert.equal(record.status, "DELETED");
   assert.equal(ledger(record.payments, record.total).paid, 0);
 });
+
+test("public website content uses inventory, protects drafts, controls publication and retains slug redirects", async () => {
+  const {
+    saveContent,
+    publicInventory,
+    publicCategories,
+    publicStudios,
+    records,
+    contentSchema,
+    jsonLd,
+  } = await import("../lib/public-site");
+  const draft = contentSchema.parse({
+    id: "test-equipment",
+    kind: "EQUIPMENT",
+    equipmentId,
+    slug: "test-camera-rental",
+    title: "Test Camera",
+    published: true,
+  });
+  await assert.rejects(saveContent(staff, draft));
+  await saveContent(owner, draft);
+  assert.equal(
+    (await publicInventory()).find((e) => e.id === equipmentId)?.slug,
+    "test-camera-rental",
+  );
+  await saveContent(owner, { ...draft, slug: "new-camera-rental" });
+  assert.ok(
+    (await records())
+      .find((p) => p.id === draft.id)
+      ?.aliases.includes("test-camera-rental"),
+  );
+  await saveContent(owner, {
+    ...draft,
+    slug: "new-camera-rental",
+    published: false,
+  });
+  assert.equal((await publicInventory()).length, 0);
+  assert.equal((await customerCatalogue()).items.length, 0);
+  assert.equal((await publicCategories()).length, 0);
+  await assert.rejects(
+    saveContent(
+      owner,
+      contentSchema.parse({
+        id: "test-studio",
+        kind: "STUDIO",
+        slug: "test-studio",
+        title: "Unverified studio",
+        published: true,
+        description: "Draft",
+        body: "Draft",
+      }),
+    ),
+  );
+  assert.equal((await publicStudios()).length, 0);
+  assert.equal(jsonLd({ text: "</script>" }).includes("</script>"), false);
+  const b = contentSchema.parse({
+    id: "business",
+    kind: "BUSINESS",
+    slug: "business",
+    title: "Verified business",
+    published: true,
+    verified: true,
+    address: "Test address",
+    phone: "+91 9000000000",
+  });
+  await saveContent(owner, b);
+  assert.equal(
+    (await records()).find((p) => p.id === "business")?.phone,
+    b.phone,
+  );
+});
+
+test("website publication rejects blank photos and protects built-in URLs", async () => {
+  const { contentSchema, saveContent } = await import("../lib/public-site");
+  assert.equal(
+    contentSchema.safeParse({
+      id: "blank-photo",
+      kind: "STUDIO",
+      slug: "blank-photo",
+      title: "Draft",
+      photos: [""],
+    }).success,
+    false,
+  );
+  await assert.rejects(
+    saveContent(
+      owner,
+      contentSchema.parse({
+        id: "duplicate-guide",
+        kind: "GUIDE",
+        slug: "planning-your-equipment-rental",
+        title: "Duplicate",
+        description: "Duplicate",
+        body: "Duplicate",
+        published: true,
+      }),
+    ),
+  );
+  await assert.rejects(
+    saveContent(
+      owner,
+      contentSchema.parse({
+        id: "blank-studio",
+        kind: "STUDIO",
+        slug: "blank-studio",
+        title: "Draft",
+        description: "   ",
+        body: "   ",
+        published: true,
+      }),
+    ),
+  );
+});

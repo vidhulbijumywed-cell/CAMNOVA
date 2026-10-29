@@ -100,6 +100,11 @@ export default function CustomerStorefront({
     } else if (response.status === 401) setAccount(null);
   }
   useEffect(() => {
+    const item = new URLSearchParams(window.location.search).get("item");
+    if (item && initial.items.some((e) => e.id === item)) {
+      setCart({ [item]: 1 });
+      setCartOpen(true);
+    }
     setRequestKey(crypto.randomUUID());
     const date = (offset: number) =>
       new Date(Date.now() + offset * 86400000).toLocaleDateString("en-CA", {
@@ -114,7 +119,11 @@ export default function CustomerStorefront({
       if (saved) {
         setFrom(saved.from);
         setTo(saved.to);
-        setCart(saved.cart);
+        setCart(
+          item && initial.items.some((e) => e.id === item)
+            ? { ...saved.cart, [item]: Math.max(1, saved.cart[item] || 0) }
+            : saved.cart,
+        );
       }
     } catch {
       sessionStorage.removeItem("camnova-customer-cart");

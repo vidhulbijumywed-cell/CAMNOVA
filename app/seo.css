@@ -1,0 +1,136 @@
+.seo-site {
+  background: #fff;
+  color: #0d0d0d;
+  min-height: 100vh;
+  font-size: 16px;
+  line-height: 1.7;
+}
+.seo-nav {
+  background: #0d0d0d;
+  color: #fff;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  padding: 20px 5%;
+  align-items: center;
+}
+.seo-nav a:first-child {
+  font-weight: 700;
+  color: #ed1a3a;
+  margin-right: auto;
+}
+.seo-site main {
+  max-width: 1200px;
+  margin: auto;
+  padding: 30px 5% 60px;
+}
+.seo-site h1 {
+  font-size: clamp(30px, 5vw, 52px);
+  margin: 20px 0;
+}
+.seo-site h2 {
+  font-size: 26px;
+  margin: 25px 0 14px;
+}
+.seo-site h3 {
+  font-size: 20px;
+  margin: 10px 0;
+}
+.seo-site p {
+  margin: 12px 0;
+  white-space: pre-line;
+}
+.seo-site section {
+  margin: 30px 0;
+}
+.seo-site a:not(.seo-nav a) {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.seo-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  font-size: 13px;
+}
+.seo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 22px;
+  margin: 25px 0;
+}
+.seo-card {
+  border: 1px solid #e2e2e2;
+  padding: 20px;
+  border-radius: 12px;
+}
+.seo-card img {
+  object-fit: contain;
+  width: 100%;
+  height: 210px;
+}
+.seo-image {
+  width: min(100%, 520px);
+  height: 340px;
+  object-fit: contain;
+}
+.seo-site details {
+  border-bottom: 1px solid #e2e2e2;
+  padding: 15px 0;
+}
+.seo-site summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.seo-site dt {
+  font-weight: 600;
+  margin-top: 12px;
+}
+.seo-site footer {
+  background: #0d0d0d;
+  color: white;
+  padding: 30px 5%;
+}
+.seo-action {
+  display: inline-block;
+  background: #ed1a3a;
+  color: #fff;
+  padding: 13px 22px;
+  margin: 15px 0;
+  border-radius: 5px;
+}
+.seo-pagination {
+  display: flex;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+.seo-editor {
+  max-width: 1000px;
+  margin: auto;
+  padding: 30px;
+  line-height: 1.6;
+}
+.seo-editor label {
+  display: block;
+  margin: 15px 0;
+}
+.seo-editor input:not([type="checkbox"]),
+.seo-editor textarea,
+.seo-editor select {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #aaa;
+  border-radius: 5px;
+}
+.seo-editor textarea {
+  min-height: 100px;
+}
+.seo-editor button,
+.seo-editor a {
+  margin: 8px;
+  padding: 8px;
+}
+.seo-editor input[type="checkbox"] {
+  margin-right: 10px;
+}

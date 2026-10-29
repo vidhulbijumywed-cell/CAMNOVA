@@ -1,3 +1,4 @@
+import { records, saveContent } from "@/lib/public-site";
 import { NextRequest, NextResponse } from "next/server";
 import { actor, HttpError, admin } from "@/lib/auth";
 import {
@@ -34,6 +35,12 @@ async function handle(
         throw new HttpError(413, "Request too large");
     }
     if (req.method === "GET") {
+      if (path[0] === "site-content" && path.length === 1) {
+        admin(a);
+        return NextResponse.json(await records(), {
+          headers: { "Cache-Control": "no-store" },
+        });
+      }
       if (path[0] === "product-photo" && path.length === 2) {
         const photo = await db.equipmentPhoto.findUnique({
           where: { equipmentId: path[1] },
@@ -137,6 +144,8 @@ async function handle(
         return NextResponse.json(result);
       }
       const body = await req.json();
+      if (path[0] === "site-content" && path.length === 1)
+        return NextResponse.json(await saveContent(a, body));
       if (path[0] === "bookings") {
         const id = path[1] ? Number(path[1]) : undefined;
         if (path[2] === "payment" && id)

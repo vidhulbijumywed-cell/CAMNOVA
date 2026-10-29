@@ -595,3 +595,17 @@
     transform: none !important;
   }
 }
+
+.cn-nav nav {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.cn-hero-actions {
+  flex-wrap: wrap;
+}
+@media (max-width: 640px) {
+  .cn-nav nav {
+    justify-content: flex-start;
+    gap: 14px 20px;
+  }
+}

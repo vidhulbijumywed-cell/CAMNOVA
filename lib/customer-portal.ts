@@ -1,3 +1,4 @@
+import { contentSchema } from "./public-site";
 import { z } from "zod";
 import { hash } from "bcryptjs";
 import { createHash } from "node:crypto";
@@ -38,8 +39,17 @@ export async function customerCatalogue(
   return db.$transaction(
     async (tx) => {
       const preferences = await settings(tx);
+      const hidden = (
+        await tx.setting.findMany({ where: { id: { startsWith: "public:" } } })
+      )
+        .map((r) => contentSchema.parse(r.value))
+        .filter((r) => r.kind === "EQUIPMENT" && !r.published)
+        .map((r) => r.equipmentId);
       const equipment = await tx.equipment.findMany({
-        where: { assets: { some: { status: { not: "RETIRED" } } } },
+        where: {
+          id: { notIn: hidden },
+          assets: { some: { status: { not: "RETIRED" } } },
+        },
         select: {
           id: true,
           name: true,
@@ -189,7 +199,18 @@ export async function submitCustomerRequest(accountId: string, input: unknown) {
     const days = rentalDays(start, end, preferences.rentalPolicy);
     const lines = [];
     let total: number | null = 0;
+    const hidden = (
+      await tx.setting.findMany({ where: { id: { startsWith: "public:" } } })
+    )
+      .map((r) => contentSchema.parse(r.value))
+      .filter((r) => r.kind === "EQUIPMENT" && !r.published)
+      .map((r) => r.equipmentId);
     for (const item of v.items) {
+      if (hidden.includes(item.equipmentId))
+        throw new HttpError(
+          400,
+          "This equipment is not currently published for requests. Contact our team.",
+        );
       const e = await tx.equipment.findUnique({
         where: { id: item.equipmentId },
       });

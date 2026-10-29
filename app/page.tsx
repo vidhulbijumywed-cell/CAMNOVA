@@ -1,4 +1,15 @@
-import type { Metadata } from "next";
+import {
+  meta,
+  publicInventory,
+  publicCategories,
+  publicStudios,
+  publicGuides,
+  business,
+  absolute,
+} from "@/lib/public-site";
+import { JsonLd } from "./components/public-site";
+import { EquipmentCards } from "./components/equipment";
+import { settings } from "@/lib/service";
 import {
   ArrowUpRight,
   ArrowRight,
@@ -9,12 +20,16 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import "./landing.css";
-export const metadata: Metadata = {
-  title: "CAMNOVA Rentals — The Complete Creator Space",
-  description:
-    "Bring your next shoot to life with CAMNOVA Rentals. Explore cameras, lenses and filmmaking equipment, check your dates and request your rental online.",
-  robots: { index: true, follow: true },
-};
+export const dynamic = "force-dynamic";
+export async function generateMetadata() {
+  const profile = await business();
+  return meta(
+    profile?.seoTitle || "CAMNOVA Rentals Kochi — The Complete Creator Space",
+    profile?.seoDescription ||
+      "Camera, lens and equipment rentals in Kochi, Kerala. Explore real inventory, check your shoot dates and send a rental enquiry with CAMNOVA.",
+    "/",
+  );
+}
 const instagram = "https://www.instagram.com/camnovarentals/";
 const categories = [
   {
@@ -36,7 +51,16 @@ const categories = [
     number: "03",
   },
 ];
-export default function Home() {
+export default async function Home() {
+  const [items, cats, studios, profile, preferences, guides] =
+    await Promise.all([
+      publicInventory(),
+      publicCategories(),
+      publicStudios(),
+      business(),
+      settings(),
+      publicGuides(),
+    ]);
   return (
     <div className="cn-home">
       <a className="cn-skip" href="#main">
@@ -52,14 +76,47 @@ export default function Home() {
           />
         </a>
         <nav aria-label="Main navigation">
-          <a href="#idea">The idea</a>
-          <a href="#gear">Our gear</a>
+          <a href="/rentals">Equipment</a>
+          {studios.some((s) => s.service === "STUDIO") && (
+            <a href="/studio-rental-kochi">Studios</a>
+          )}
+          {studios.some((s) => s.service === "PODCAST") && (
+            <a href="/podcast-studio-kochi">Podcast studio</a>
+          )}
+          {guides.length > 0 && <a href="/guides">Guides</a>}
+          <a href="/about">About</a>
+          <a href="/contact">Contact</a>
           <a href="#how-it-works">How it works</a>
         </nav>
         <a className="cn-button" href="/rentals">
           Book now <ArrowUpRight size={18} />
         </a>
       </header>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebSite",
+              "@id": absolute("/#website"),
+              url: absolute("/"),
+              name: "CAMNOVA Rentals",
+            },
+            {
+              "@type": "LocalBusiness",
+              "@id": absolute("/#business"),
+              name: profile?.title || "CAMNOVA Rentals",
+              url: absolute("/"),
+              areaServed: "Kochi, Kerala",
+              image: absolute("/logo.png"),
+              ...(profile?.address ? { address: profile.address } : {}),
+              ...(profile?.phone ? { telephone: profile.phone } : {}),
+              ...(profile?.mapsUrl ? { hasMap: profile.mapsUrl } : {}),
+              sameAs: [profile?.instagram || instagram],
+            },
+          ],
+        }}
+      />
       <main id="main">
         <section className="cn-hero" aria-labelledby="hero-title">
           <div className="cn-hero-copy">
@@ -74,8 +131,9 @@ export default function Home() {
               <em>SPACE</em>
             </h1>
             <p className="cn-intro">
-              From the first spark to the final shot. Rent the equipment you
-              need to bring your vision to life with CAMNOVA.
+              Camera, lens and production equipment rentals in Kochi, Kerala.
+              Find the tools for your next shoot, check your dates and send a
+              rental request.
             </p>
             <div className="cn-hero-actions">
               <a className="cn-button" href="/rentals">
@@ -153,6 +211,32 @@ export default function Home() {
             </a>
           </div>
         </section>
+        <section className="cn-section" aria-label="Live rental equipment">
+          <p className="cn-kicker">REAL GEAR / KOCHI, KERALA</p>
+          <h2>EXPLORE OUR RENTALS</h2>
+          <div className="cn-hero-actions">
+            {cats.map((c) => (
+              <a className="cn-text-link" key={c.slug} href={`/${c.slug}`}>
+                {c.plural} in Kochi
+              </a>
+            ))}
+          </div>
+          <EquipmentCards
+            items={items.slice(0, 6)}
+            unit={
+              preferences.rentalPolicy === "24H"
+                ? "started 24-hour period"
+                : "calendar day"
+            }
+          />
+          {studios.map((s) => (
+            <p key={s.id}>
+              <a className="cn-text-link" href={`/studios/${s.slug}`}>
+                {s.title}
+              </a>
+            </p>
+          ))}
+        </section>
         <section id="gear" className="cn-gear cn-section">
           <div className="cn-section-heading">
             <div>
@@ -169,7 +253,19 @@ export default function Home() {
           </div>
           <div className="cn-gear-grid">
             {categories.map((c) => (
-              <a className="cn-gear-card" href="/rentals" key={c.name}>
+              <a
+                className="cn-gear-card"
+                href={
+                  cats.find(
+                    (cat) =>
+                      cat.plural === c.name ||
+                      (c.name === "Gimbals & more" && cat.code === "GIMBAL"),
+                  )
+                    ? `/${cats.find((cat) => cat.plural === c.name || (c.name === "Gimbals & more" && cat.code === "GIMBAL"))!.slug}`
+                    : "/rentals"
+                }
+                key={c.name}
+              >
                 <div className="cn-card-top">
                   <span>{c.number} / RENTAL GEAR</span>
                   <ArrowUpRight size={22} />
