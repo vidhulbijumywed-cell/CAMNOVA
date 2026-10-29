@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { signOut } from "next-auth/react";
+import RentalCard, { rentalCategoryLabels } from "../components/rental-card";
 import {
   Camera,
   ArrowRight,
@@ -26,16 +27,7 @@ type Account = {
   email: string;
   requests: RequestRow[];
 };
-const labels: Record<string, string> = {
-  CAMERA: "Cameras",
-  LENS: "Lenses",
-  LIGHT: "Lights",
-  GIMBAL: "Gimbals",
-  MIC: "Audio",
-  BATTERY: "Batteries",
-  CARD: "Cards",
-  OTHER: "Accessories",
-};
+const labels = rentalCategoryLabels;
 const instant = (value: string) => `${value}:00+05:30`;
 const displayDate = (value: string | null) =>
   value
@@ -325,68 +317,60 @@ export default function CustomerStorefront({
                   e.name.toLowerCase().includes(query.toLowerCase()),
               )
               .map((e) => (
-                <article className="portal-product" key={e.id}>
-                  <div className="portal-product-image">
-                    {e.photo ? (
-                      <img src={e.photo} alt={e.name} loading="lazy" />
-                    ) : (
-                      <Camera size={72} strokeWidth={1} />
-                    )}
-                    <span>{labels[e.category] ?? e.category}</span>
-                  </div>
-                  <h3>{e.name}</h3>
-                  <p
-                    className={
-                      current && !e.available ? "portal-unavailable" : ""
-                    }
-                  >
-                    {current
+                <RentalCard
+                  key={e.id}
+                  item={e}
+                  availability={
+                    current
                       ? e.available
                         ? `${e.available} available for your dates`
                         : "Unavailable for these dates"
-                      : "Check dates for availability"}
-                  </p>
-                  <div className="portal-product-bottom">
-                    <strong>
-                      {e.rate === null ? "Rate on request" : money(e.rate)}
-                      {e.rate !== null && <small> / day</small>}
-                    </strong>
-                    {cart[e.id] ? (
-                      <div className="portal-stepper">
+                      : "Check dates for availability"
+                  }
+                  unavailable={Boolean(current && !e.available)}
+                  actions={
+                    <>
+                      {cart[e.id] ? (
+                        <div className="portal-stepper">
+                          <button
+                            aria-label={`Remove one ${e.name}`}
+                            onClick={() => changeQuantity(e.id, cart[e.id] - 1)}
+                          >
+                            <Minus size={14} />
+                          </button>
+                          <span>{cart[e.id]}</span>
+                          <button
+                            aria-label={`Add one ${e.name}`}
+                            disabled={
+                              !current ||
+                              busy ||
+                              cart[e.id] >= (e.available ?? 0)
+                            }
+                            onClick={() => changeQuantity(e.id, cart[e.id] + 1)}
+                          >
+                            <Plus size={14} />
+                          </button>
+                        </div>
+                      ) : (
                         <button
-                          aria-label={`Remove one ${e.name}`}
-                          onClick={() => changeQuantity(e.id, cart[e.id] - 1)}
+                          className="portal-add"
+                          aria-label={`Add ${e.name}`}
+                          disabled={!current || busy || !e.available}
+                          onClick={() => changeQuantity(e.id, 1)}
                         >
-                          <Minus size={14} />
+                          Add
                         </button>
-                        <span>{cart[e.id]}</span>
-                        <button
-                          aria-label={`Add one ${e.name}`}
-                          disabled={
-                            !current || busy || cart[e.id] >= (e.available ?? 0)
-                          }
-                          onClick={() => changeQuantity(e.id, cart[e.id] + 1)}
-                        >
-                          <Plus size={14} />
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        className="portal-add"
-                        aria-label={`Add ${e.name}`}
-                        disabled={!current || busy || !e.available}
-                        onClick={() => changeQuantity(e.id, 1)}
-                      >
-                        Add
-                      </button>
-                    )}
-                  </div>
-                  {current && (cart[e.id] ?? 0) > (e.available ?? 0) && (
-                    <p className="portal-error">
-                      Reduce quantity for these dates.
-                    </p>
-                  )}
-                </article>
+                      )}
+                    </>
+                  }
+                  warning={
+                    current && (cart[e.id] ?? 0) > (e.available ?? 0) ? (
+                      <p className="portal-error">
+                        Reduce quantity for these dates.
+                      </p>
+                    ) : null
+                  }
+                />
               ))}
           </div>
           {!catalogue.items.some(

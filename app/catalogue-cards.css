@@ -1,0 +1,56 @@
+.portal.catalogue-cards {
+  padding: 0;
+  min-height: 0;
+  background: transparent;
+  margin: 25px 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.catalogue-cards .portal-product {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.catalogue-cards .portal-product-image {
+  flex-shrink: 0;
+}
+.catalogue-cards .portal-product h3 {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.catalogue-cards .portal-product > p {
+  color: #777;
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 10px 0;
+  white-space: normal;
+}
+.catalogue-cards .portal-product-bottom {
+  margin-top: auto;
+  padding-top: 6px;
+}
+.catalogue-cards .portal-product-bottom strong {
+  font-size: 15px;
+}
+.catalogue-cards .portal-product-bottom small {
+  display: block;
+  color: #777;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.seo-site .catalogue-cards a {
+  text-decoration: none;
+}
+.catalogue-cards .portal-add {
+  color: #fff;
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: nowrap;
+}
+.catalogue-billing {
+  font-size: 12px !important;
+}
