@@ -44,7 +44,7 @@
   margin: 30px 0;
 }
 .seo-site a:not(.seo-nav a) {
-  text-decoration: underline;
+  text-decoration: none;
   text-underline-offset: 4px;
 }
 .seo-crumbs {
