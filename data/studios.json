@@ -1,0 +1,107 @@
+{
+  "whatsapp": "917736655080",
+  "tagline": "Come rent and shoot.",
+  "intro": "Two studio floors in Kochi, Thammanam and Vennala. Shoot, record a podcast or get ready, and rent the gear you need in the same building.",
+  "studios": [
+    {
+      "id": "thammanam",
+      "name": "Camnova Studio, Thammanam",
+      "location": "Thammanam",
+      "address": "Felix Rd, DD Village, Thammanam, Ernakulam, Kerala 682032",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=Felix%20Rd%2C%20DD%20Village%2C%20Thammanam%2C%20Ernakulam%2C%20Kerala%20682032",
+      "facilities": [
+        "Shooting floor",
+        "Podcast room",
+        "Makeup room",
+        "Pantry",
+        "Gear available in house"
+      ],
+      "images": {
+        "hero": "/assets/studios/thammanam-hero.jpg",
+        "shootingFloor": "/assets/studios/thammanam-shooting-floor.jpg",
+        "podcastRoom": "/assets/studios/thammanam-podcast-room.jpg",
+        "makeupRoom": "/assets/studios/thammanam-makeup-room.jpg",
+        "pantry": "/assets/studios/thammanam-pantry.jpg"
+      },
+      "alt": {
+        "hero": "Thammanam, studio overview (sample placeholder)",
+        "shootingFloor": "Thammanam, shooting floor (sample placeholder)",
+        "podcastRoom": "Thammanam, podcast room (sample placeholder)",
+        "makeupRoom": "Thammanam, makeup room (sample placeholder)",
+        "pantry": "Thammanam, pantry (sample placeholder)"
+      },
+      "TODO": [
+        "Replace all five sample images, update alt text, then set placeholderImages to false",
+        "Confirm exact Google Maps place pin; current link searches the supplied address"
+      ],
+      "placeholderImages": true
+    },
+    {
+      "id": "vennala",
+      "name": "Camnova Studio, Vennala",
+      "location": "Vennala",
+      "address": "",
+      "mapsUrl": "",
+      "facilities": [
+        "Shooting floor",
+        "Podcast room",
+        "Makeup room",
+        "Pantry",
+        "Gear available in house"
+      ],
+      "images": {
+        "hero": "/assets/studios/vennala-hero.jpg",
+        "shootingFloor": "/assets/studios/vennala-shooting-floor.jpg",
+        "podcastRoom": "/assets/studios/vennala-podcast-room.jpg",
+        "makeupRoom": "/assets/studios/vennala-makeup-room.jpg",
+        "pantry": "/assets/studios/vennala-pantry.jpg"
+      },
+      "alt": {
+        "hero": "Vennala, studio overview (sample placeholder)",
+        "shootingFloor": "Vennala, shooting floor (sample placeholder)",
+        "podcastRoom": "Vennala, podcast room (sample placeholder)",
+        "makeupRoom": "Vennala, makeup room (sample placeholder)",
+        "pantry": "Vennala, pantry (sample placeholder)"
+      },
+      "TODO": [
+        "Replace all five sample images, update alt text, then set placeholderImages to false",
+        "Add verified Google Maps place URL",
+        "Add full verified Vennala street address"
+      ],
+      "placeholderImages": true
+    }
+  ],
+  "podcastPackages": [
+    {
+      "id": "pkg-1",
+      "name": "Podcast package 1",
+      "includes": ["Podcast room session", "Editing included"],
+      "image": "/assets/studios/podcast-package-1.jpg",
+      "alt": "Podcast package 1 (sample placeholder)",
+      "placeholder": true,
+      "TODO": "Replace placeholder package name, verify distinct package inclusions and replace sample image"
+    },
+    {
+      "id": "pkg-2",
+      "name": "Podcast package 2",
+      "includes": ["Podcast room session", "Editing included"],
+      "image": "/assets/studios/podcast-package-2.jpg",
+      "alt": "Podcast package 2 (sample placeholder)",
+      "placeholder": true,
+      "TODO": "Replace placeholder package name, verify distinct package inclusions and replace sample image"
+    },
+    {
+      "id": "pkg-3",
+      "name": "Podcast package 3",
+      "includes": ["Podcast room session", "Editing included"],
+      "image": "/assets/studios/podcast-package-3.jpg",
+      "alt": "Podcast package 3 (sample placeholder)",
+      "placeholder": true,
+      "TODO": "Replace placeholder package name, verify distinct package inclusions and replace sample image"
+    }
+  ],
+  "TODO": [
+    "Confirm package names and inclusions before removing placeholder labels",
+    "Keep preferred dates as enquiries; studio availability and confirmation are handled by our team"
+  ]
+}

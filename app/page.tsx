@@ -1,3 +1,5 @@
+import StudiosSection from "./components/studios";
+import StudioSchema from "./components/studio-schema";
 import {
   meta,
   publicInventory,
@@ -77,12 +79,7 @@ export default async function Home() {
         </a>
         <nav aria-label="Main navigation">
           <a href="/rentals">Equipment</a>
-          {studios.some((s) => s.service === "STUDIO") && (
-            <a href="/studio-rental-kochi">Studios</a>
-          )}
-          {studios.some((s) => s.service === "PODCAST") && (
-            <a href="/podcast-studio-kochi">Podcast studio</a>
-          )}
+          <a href="#studios">Studios</a>
           {guides.length > 0 && <a href="/guides">Guides</a>}
           <a href="/about">About</a>
           <a href="/contact">Contact</a>
@@ -136,6 +133,9 @@ export default async function Home() {
               rental request.
             </p>
             <div className="cn-hero-actions">
+              <a className="cn-text-link" href="#studios">
+                Explore our studios <ArrowRight size={18} />
+              </a>
               <a className="cn-button" href="/rentals">
                 Book now <ArrowUpRight size={20} />
               </a>
@@ -211,7 +211,13 @@ export default async function Home() {
             </a>
           </div>
         </section>
-        <section className="cn-section" aria-label="Live rental equipment">
+        <StudioSchema />
+        <StudiosSection />
+        <section
+          id="catalogue"
+          className="cn-section"
+          aria-label="Live rental equipment"
+        >
           <p className="cn-kicker">REAL GEAR / MADE FOR CREATORS</p>
           <h2>EXPLORE OUR RENTALS</h2>
           <div className="cn-hero-actions">

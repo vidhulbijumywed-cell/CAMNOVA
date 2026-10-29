@@ -45,12 +45,7 @@ export async function SiteNav() {
           {c.plural}
         </Link>
       ))}
-      {studios.some((s) => s.service === "STUDIO") && (
-        <Link href="/studio-rental-kochi">Studios</Link>
-      )}
-      {studios.some((s) => s.service === "PODCAST") && (
-        <Link href="/podcast-studio-kochi">Podcast studio</Link>
-      )}
+      <Link href="/studios">Studios</Link>
       {guides.length > 0 && <Link href="/guides">Guides</Link>}
       <Link href="/about">About</Link>
       <Link href="/contact">Contact</Link>

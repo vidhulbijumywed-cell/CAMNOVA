@@ -20,7 +20,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     (r) => r.kind === "BUSINESS" && r.published && r.verified,
   );
   return [
-    ...["/", "/rentals", "/about", "/contact"].map((path) => ({
+    ...["/", "/rentals", "/about", "/contact", "/studios"].map((path) => ({
       url: absolute(path),
       ...(b?.updatedAt ? { lastModified: b.updatedAt } : {}),
     })),
