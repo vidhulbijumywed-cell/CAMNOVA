@@ -609,3 +609,191 @@
     gap: 14px 20px;
   }
 }
+
+/* Opening screen: navy, silver-white and the original Camnova red accent. */
+.cn-nav {
+  background: #071827;
+  border-bottom-color: #c5d6e51c;
+  padding-block: 23px;
+}
+.cn-nav nav {
+  color: #c6d3df;
+  gap: 22px;
+}
+.cn-nav .cn-button,
+.cn-hero .cn-button {
+  color: #071827;
+  background: #f2f5f7;
+  border-radius: 3px;
+}
+.cn-nav a:focus-visible,
+.cn-hero a:focus-visible {
+  outline-color: #fff;
+}
+.cn-hero {
+  background: #071827;
+  position: relative;
+  min-height: min(780px, calc(100svh - 100px));
+  padding: 72px 6% 78px;
+  grid-template-columns: 1fr 1fr;
+  gap: 7%;
+  isolation: isolate;
+}
+.cn-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 0 57%;
+  background: #0b2236;
+  clip-path: polygon(29% 0, 100% 0, 100% 100%, 0 100%);
+  z-index: -1;
+}
+.cn-hero .cn-kicker {
+  color: #aabecf;
+  font-weight: 400;
+  letter-spacing: 2.2px;
+}
+.cn-hero h1 {
+  font-size: clamp(48px, 5.7vw, 88px);
+  line-height: 1.04;
+  letter-spacing: -4px;
+  font-weight: 500;
+  color: #f2f5f7;
+  margin-block: 30px;
+}
+.cn-hero h1 em {
+  color: #ed1a3a;
+}
+.cn-hero .cn-intro {
+  color: #b4c5d3;
+  max-width: 395px;
+  font-size: 15px;
+  line-height: 1.8;
+}
+.cn-hero .cn-hero-actions {
+  gap: 22px;
+}
+.cn-hero-actions > a[href="#idea"] {
+  display: none;
+}
+.cn-hero .cn-hero-foot {
+  color: #92aabd;
+  font-size: 10px;
+  margin-top: 45px;
+  letter-spacing: 0.5px;
+}
+.cn-hero-visual {
+  min-height: 450px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 36px;
+}
+.cn-brand-index {
+  color: #9eb6c9;
+  font-size: 9px;
+  letter-spacing: 2.8px;
+}
+.cn-brand-panel {
+  border: 1px solid #cad7e433;
+  border-radius: 12px;
+  padding: 60px 36px 36px;
+  position: relative;
+}
+.cn-brand-panel::after {
+  content: "";
+  position: absolute;
+  width: 42px;
+  height: 5px;
+  background: #ed1a3a;
+  top: -3px;
+  right: 36px;
+  transform: rotate(-15deg);
+}
+.cn-hero-logo {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+.cn-brand-rule {
+  display: block;
+  width: 30px;
+  height: 1px;
+  background: #a7bccd;
+  margin: 45px 0 22px;
+}
+.cn-brand-panel p {
+  color: #a7bdce;
+  font-size: 20px;
+  line-height: 1.5;
+  letter-spacing: -0.5px;
+}
+.cn-brand-panel strong {
+  color: #f2f5f7;
+  font-weight: 400;
+}
+.cn-brand-services {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #b4c5d3;
+  font-size: 11px;
+}
+@media (max-width: 1000px) {
+  .cn-nav nav {
+    gap: 12px 18px;
+  }
+  .cn-hero {
+    gap: 5%;
+  }
+  .cn-brand-panel {
+    padding: 44px 24px 28px;
+  }
+  .cn-hero h1 {
+    letter-spacing: -2.5px;
+  }
+}
+@media (max-width: 640px) {
+  .cn-nav {
+    padding: 20px 6%;
+  }
+  .cn-nav nav {
+    gap: 12px 19px;
+    font-size: 11px;
+  }
+  .cn-hero {
+    grid-template-columns: 1fr;
+    padding: 44px 7% 40px;
+    gap: 42px;
+  }
+  .cn-hero::before {
+    inset: 48% 0 0 18%;
+  }
+  .cn-hero h1 {
+    font-size: clamp(46px, 11vw, 68px);
+    letter-spacing: -2.5px;
+    margin-block: 24px;
+  }
+  .cn-hero .cn-intro {
+    font-size: 14px;
+  }
+  .cn-hero .cn-hero-foot {
+    margin-top: 25px;
+  }
+  .cn-hero-visual {
+    min-height: 0;
+    gap: 20px;
+    max-width: 430px;
+  }
+  .cn-brand-panel {
+    padding: 36px 26px 25px;
+  }
+  .cn-brand-rule {
+    margin-top: 30px;
+  }
+  .cn-brand-panel p {
+    font-size: 18px;
+  }
+  .cn-brand-services {
+    font-size: 10px;
+    flex-wrap: wrap;
+  }
+}

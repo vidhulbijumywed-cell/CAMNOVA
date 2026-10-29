@@ -128,9 +128,9 @@ export default async function Home() {
               <em>SPACE</em>
             </h1>
             <p className="cn-intro">
-              Camera, lens and production equipment rentals in Kochi, Kerala.
-              Find the tools for your next shoot, check your dates and send a
-              rental request.
+              The space to create. The gear to make it happen. Explore our
+              equipment, studio floors and podcast spaces — and bring your next
+              idea to life.
             </p>
             <div className="cn-hero-actions">
               <a className="cn-text-link" href="#studios">
@@ -147,30 +147,32 @@ export default async function Home() {
               Photography · Films · Content · Your next big thing
             </p>
           </div>
-          <div className="cn-hero-visual">
-            <div className="cn-disc" aria-hidden="true" />
-            <span className="cn-frame cn-frame-top" aria-hidden="true" />
-            <span className="cn-frame cn-frame-bottom" aria-hidden="true" />
-            <span className="cn-visual-label">FOCUS ON WHAT YOU CREATE.</span>
-            <img
-              className="cn-main-camera"
-              src="/storefront/cam.webp"
-              alt="Sony mirrorless camera body"
-              width="700"
-              height="650"
-              fetchPriority="high"
-            />
-            <div className="cn-visual-caption">
-              <Aperture size={29} />
-              <span>
-                The Complete
+          <div
+            className="cn-hero-visual"
+            aria-label="CAMNOVA — The Complete Creator Space"
+          >
+            <span className="cn-brand-index">A SPACE FOR YOUR NEXT IDEA</span>
+            <div className="cn-brand-panel">
+              <img
+                className="cn-hero-logo"
+                src="/storefront/wordmark-white.png"
+                alt="CAMNOVA Rentals"
+                width="570"
+                height="180"
+                fetchPriority="high"
+              />
+              <span className="cn-brand-rule" aria-hidden="true" />
+              <p>
+                Make room for
                 <br />
-                <strong>Creator Space</strong>
-              </span>
+                <strong>something original.</strong>
+              </p>
             </div>
-            <span className="cn-coordinate" aria-hidden="true">
-              CAMNOVA / RENTALS / 001
-            </span>
+            <div className="cn-brand-services">
+              <span>Equipment rentals</span>
+              <span>Studio floors</span>
+              <span>Podcast studio</span>
+            </div>
           </div>
         </section>
         <div className="cn-strip" aria-hidden="true">
