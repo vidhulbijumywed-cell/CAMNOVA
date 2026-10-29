@@ -43,7 +43,7 @@ export async function generateMetadata({
   const { category, type } = await resolve(slug);
   return meta(
     category?.page?.seoTitle ||
-      `${category?.name || (type === "PODCAST" ? "Podcast studio" : "Studio")} rental in Kochi | CAMNOVA`,
+      `${category?.name || (type === "PODCAST" ? "Podcast studio" : "Studio")} rental | CAMNOVA`,
     category?.page?.seoDescription ||
       category?.intro ||
       "Explore verified CAMNOVA studio facilities and rental details in Kochi.",
@@ -63,8 +63,8 @@ export default async function ServicePage({
     records(),
   ]);
   const name = category
-    ? `${category.name} rental in Kochi`
-    : `${type === "PODCAST" ? "Podcast studio" : "Studio"} rental in Kochi`;
+    ? `${category.name} rental`
+    : `${type === "PODCAST" ? "Podcast studio" : "Studio"} rental`;
   const intro =
     category?.page?.description ||
     category?.intro ||
@@ -135,7 +135,7 @@ export default async function ServicePage({
           .filter((c) => c.slug !== slug)
           .map((c) => (
             <p key={c.slug}>
-              <Link href={`/${c.slug}`}>{c.plural} in Kochi</Link>
+              <Link href={`/${c.slug}`}>{c.plural}</Link>
             </p>
           ))}
         {content

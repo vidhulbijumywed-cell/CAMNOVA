@@ -25,7 +25,7 @@ export async function generateMetadata({
 }) {
   const s = await studio((await params).slug);
   return meta(
-    s.seoTitle || `${s.title} | Studio rental in Kochi`,
+    s.seoTitle || `${s.title} | Studio rental`,
     s.seoDescription || s.description,
     `/studios/${s.slug}`,
   );

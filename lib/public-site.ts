@@ -24,6 +24,12 @@ const safeUrl = z.union([
   z.literal(""),
   z.url().refine((v) => v.startsWith("https://"), "Use an HTTPS URL"),
 ]);
+export const titleText = (value: string) =>
+  value
+    .replace(/\s*(?:in\s+)?\bkochi\b(?:,\s*kerala)?/gi, "")
+    .replace(/\s{2,}/g, " ")
+    .replace(/[ ,|–—-]+$/g, "")
+    .trim();
 export const contentSchema = z.object({
   id: z.string().regex(/^[a-zA-Z0-9:_-]{1,150}$/),
   kind: z.enum(["BUSINESS", "CATEGORY", "EQUIPMENT", "STUDIO", "GUIDE"]),
@@ -31,7 +37,13 @@ export const contentSchema = z.object({
     .string()
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
     .max(150),
-  title: z.string().trim().min(1).max(200),
+  title: z
+    .string()
+    .trim()
+    .min(1)
+    .max(200)
+    .transform(titleText)
+    .refine(Boolean, "Enter a page title"),
   description: z.string().trim().max(1000).default(""),
   body: z.string().trim().max(12000).default(""),
   published: z.boolean().default(false),
@@ -40,7 +52,7 @@ export const contentSchema = z.object({
   equipmentId: z.string().max(100).default(""),
   category: z.string().max(40).default(""),
   service: z.enum(["STUDIO", "PODCAST"]).default("STUDIO"),
-  seoTitle: z.string().max(200).default(""),
+  seoTitle: z.string().max(200).default("").transform(titleText),
   seoDescription: z.string().max(500).default(""),
   details: z
     .array(
@@ -154,7 +166,7 @@ export const draftTemplates: SiteContent[] = [
     id: "planning-guide",
     kind: "GUIDE",
     slug: "planning-your-equipment-rental",
-    title: "Planning your equipment rental in Kochi",
+    title: "Planning your equipment rental",
     published: true,
     description:
       "A practical checklist for choosing equipment, checking dates and sending your CAMNOVA rental request.",
@@ -245,6 +257,7 @@ export function meta(
   path: string,
   noindex = false,
 ): Metadata {
+  title = titleText(title);
   return {
     title,
     description,

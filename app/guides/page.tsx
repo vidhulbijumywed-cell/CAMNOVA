@@ -4,7 +4,7 @@ import { publicGuides, meta } from "@/lib/public-site";
 import { PublicShell } from "@/app/components/public-site";
 export const dynamic = "force-dynamic";
 export const metadata = meta(
-  "Rental planning guides | CAMNOVA Kochi",
+  "Rental planning guides | CAMNOVA",
   "Practical guides to planning your camera, equipment and studio rentals with CAMNOVA.",
   "/guides",
 );

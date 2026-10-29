@@ -178,7 +178,7 @@ export default function Editor({
                   ...r,
                   category: c.code,
                   slug: c.slug,
-                  title: `${c.name} rental in Kochi`,
+                  title: `${c.name} rental`,
                 }));
               }}
             >

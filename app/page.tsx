@@ -24,7 +24,7 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata() {
   const profile = await business();
   return meta(
-    profile?.seoTitle || "CAMNOVA Rentals Kochi — The Complete Creator Space",
+    profile?.seoTitle || "CAMNOVA Rentals — The Complete Creator Space",
     profile?.seoDescription ||
       "Camera, lens and equipment rentals in Kochi, Kerala. Explore real inventory, check your shoot dates and send a rental enquiry with CAMNOVA.",
     "/",
@@ -212,12 +212,12 @@ export default async function Home() {
           </div>
         </section>
         <section className="cn-section" aria-label="Live rental equipment">
-          <p className="cn-kicker">REAL GEAR / KOCHI, KERALA</p>
+          <p className="cn-kicker">REAL GEAR / MADE FOR CREATORS</p>
           <h2>EXPLORE OUR RENTALS</h2>
           <div className="cn-hero-actions">
             {cats.map((c) => (
               <a className="cn-text-link" key={c.slug} href={`/${c.slug}`}>
-                {c.plural} in Kochi
+                {c.plural}
               </a>
             ))}
           </div>

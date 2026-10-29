@@ -16,7 +16,7 @@ export default async function CatalogueLinks({ page = 1 }: { page?: number }) {
       style={{ padding: "35px 5%" }}
       aria-label="Equipment rental directory"
     >
-      <h2>Rental equipment in Kochi</h2>
+      <h2>Rental equipment</h2>
       <p>
         Browse current model details and rental rates. Use the date picker above
         to check availability.

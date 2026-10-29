@@ -37,7 +37,7 @@ export async function generateMetadata({
 }) {
   const { e } = await find((await params).slug);
   return meta(
-    e.page?.seoTitle || `${e.name} rental in Kochi | CAMNOVA`,
+    e.page?.seoTitle || `${e.name} rental | CAMNOVA`,
     e.page?.seoDescription ||
       e.page?.description ||
       `Rent ${e.name} from CAMNOVA Rentals in Kochi, Kerala. Check rental rates, choose your dates and send a booking request.`,
@@ -64,7 +64,7 @@ export default async function EquipmentPage({
           { name: e.name, path: `/rentals/${e.slug}` },
         ]}
       />
-      <h1>{e.name} rental in Kochi</h1>
+      <h1>{e.name} rental</h1>
       {e.photo && (
         <img
           className="seo-image"

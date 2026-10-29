@@ -3,7 +3,7 @@ import { meta } from "@/lib/public-site";
 import { PublicShell, Crumbs } from "@/app/components/public-site";
 export const dynamic = "force-dynamic";
 export const metadata = meta(
-  "About CAMNOVA Rentals | The Complete Creator Space, Kochi",
+  "About CAMNOVA Rentals | The Complete Creator Space",
   "Meet CAMNOVA Rentals / Camnova Private Limited, serving creators in Kochi, Kerala with camera and equipment rentals.",
   "/about",
 );

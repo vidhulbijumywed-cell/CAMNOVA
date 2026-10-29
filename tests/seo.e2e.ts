@@ -8,7 +8,7 @@ test("public SEO pages return crawlable HTML, canonical metadata, accurate renta
   const response = await request.get("/rentals");
   expect(response.status()).toBe(200);
   const html = await response.text();
-  expect(html).toContain("Rental equipment in Kochi");
+  expect(html).toContain("Rental equipment");
   expect(html).toContain("/rentals/");
   expect(html).not.toContain('name="robots" content="noindex');
   const catalogue = await (await request.get("/api/customer/catalogue")).json();
@@ -28,6 +28,8 @@ test("public SEO pages return crawlable HTML, canonical metadata, accurate renta
   expect(text).not.toContain("purchaseCost");
   await page.goto(href!);
   await expect(page.locator("h1")).toHaveCount(1);
+  await expect(page.locator("h1")).not.toContainText(/kochi/i);
+  await expect(page).not.toHaveTitle(/kochi/i);
   await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
     "href",
     origin + href,

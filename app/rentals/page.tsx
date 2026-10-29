@@ -24,7 +24,7 @@ async function options(searchParams: Props["searchParams"]) {
 export async function generateMetadata({ searchParams }: Props) {
   const { page, q } = await options(searchParams);
   return meta(
-    `Camera & equipment rentals in Kochi${page > 1 ? ` — Page ${page}` : ""} | CAMNOVA`,
+    `Camera & equipment rentals${page > 1 ? ` — Page ${page}` : ""} | CAMNOVA`,
     "Browse real camera, lens, lighting and audio rental equipment from CAMNOVA in Kochi. Choose your dates and send a booking request.",
     page > 1 ? `/rentals?page=${page}` : "/rentals",
     Object.keys(q).some((k) => k !== "page"),
