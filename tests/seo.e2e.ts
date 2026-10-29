@@ -15,6 +15,8 @@ test("public SEO pages return crawlable HTML, canonical metadata, accurate renta
   const e = catalogue.items[0];
   expect(e).toBeTruthy();
   await page.goto("/rentals");
+  await expect(page.getByRole("link",{name:"CAMNOVA Rentals home",exact:true})).toHaveCount(1);
+  await expect(page.locator(".seo-nav")).toHaveCount(0);
   const link = page
     .locator(".seo-card h3 a")
     .filter({ hasText: e.name })

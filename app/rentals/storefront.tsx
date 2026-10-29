@@ -181,7 +181,7 @@ export default function CustomerStorefront({
         </div>
       )}
       <header className="portal-header">
-        <a href="/rentals">
+        <a href="/" aria-label="CAMNOVA Rentals home">
           <img src="/storefront/wordmark-white.png" alt="CAMNOVA Rentals" />
         </a>
         <button className="portal-outline" onClick={() => setCartOpen(true)}>

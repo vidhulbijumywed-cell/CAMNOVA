@@ -134,3 +134,14 @@
 .seo-editor input[type="checkbox"] {
   margin-right: 10px;
 }
+
+.seo-brand {
+  display: block;
+  flex-shrink: 0;
+}
+.seo-brand img {
+  display: block;
+  width: 180px;
+  max-width: 100%;
+  height: auto;
+}

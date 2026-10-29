@@ -3,7 +3,6 @@ import { customerCatalogue } from "@/lib/customer-portal";
 import { publicInventory, meta } from "@/lib/public-site";
 import CustomerStorefront from "./storefront";
 import CatalogueLinks from "../components/catalogue-links";
-import { SiteNav } from "../components/public-site";
 import "../customer-portal.css";
 export const dynamic = "force-dynamic";
 type Props = {
@@ -34,7 +33,6 @@ export default async function RentalsPage({ searchParams }: Props) {
   const { page } = await options(searchParams);
   return (
     <>
-      <SiteNav />
       <CustomerStorefront initial={await customerCatalogue()} />
       <CatalogueLinks page={page} />
     </>

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import {
   publicCategories,
-  publicStudios,
   publicGuides,
   business,
   jsonLd,
@@ -31,14 +30,20 @@ export function Crumbs({ parts }: { parts: { name: string; path: string }[] }) {
   );
 }
 export async function SiteNav() {
-  const [cats, studios, guides] = await Promise.all([
+  const [cats, guides] = await Promise.all([
     publicCategories(),
-    publicStudios(),
     publicGuides(),
   ]);
   return (
     <nav className="seo-nav" aria-label="Website navigation">
-      <Link href="/">CAMNOVA</Link>
+      <Link className="seo-brand" href="/" aria-label="CAMNOVA Rentals home">
+        <img
+          src="/storefront/wordmark-white.png"
+          alt="CAMNOVA Rentals"
+          width="180"
+          height="57"
+        />
+      </Link>
       <Link href="/rentals">Equipment</Link>
       {cats.map((c) => (
         <Link key={c.code} href={`/${c.slug}`}>
